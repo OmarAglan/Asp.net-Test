@@ -13,6 +13,7 @@ To provide a system for doctors to issue and manage prescriptions, patients to v
 *   **Data Access:** Entity Framework Core
 *   **Database:** SQLite (currently using `roshta.db`)
 *   **Authentication:** ASP.NET Core Identity (Planned)
+*   **Core Models:** Includes Patients, Doctors, Prescriptions, Medications with relationships, audit fields (`CreatedAt`, `UpdatedAt`), status tracking (e.g., `PrescriptionStatus` enum), and specific fields for visits, payments, etc.
 
 ## Getting Started
 

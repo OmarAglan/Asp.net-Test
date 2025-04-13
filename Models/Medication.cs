@@ -19,6 +19,10 @@ public class Medication
     [StringLength(100)]
     public string? Manufacturer { get; set; }
 
+    // Audit Fields
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
     // Navigation property for related PrescriptionItems
     public virtual ICollection<PrescriptionItem> PrescriptionItems { get; set; } = new List<PrescriptionItem>();
 

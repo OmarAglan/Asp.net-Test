@@ -4,7 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.1.0] - YYYY-MM-DD
+## [0.2.0] - YYYY-MM-DD
+
+### Added
+
+*   Added specific fields (e.g., `IsSubscribed`, `VisitCount`, `HasOutstandingBalance`, `Notes`, `ContactPhone`, `ContactEmail`) to core models based on requirements.
+*   Added audit fields (`CreatedAt`, `UpdatedAt`) to all core models.
+*   Added `PrescriptionStatus` enum.
+*   Added `ApplicationDbContext.SaveChanges` override to auto-update audit fields.
+
+### Changed
+
+*   Refined core data models with suggestions (e.g., `IsActive` flags, `Prescription.Status` changed to enum).
+
+## [0.1.0] - 2025-04-13
 
 ### Added
 

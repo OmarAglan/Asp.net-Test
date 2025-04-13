@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Roshta.Models; // Update namespace
+using System.Reflection.Emit;
 
 namespace Roshta.Data; // Update namespace
 
@@ -52,5 +53,59 @@ public class ApplicationDbContext : DbContext
             .WithMany(m => m.PrescriptionItems)
             .HasForeignKey(pi => pi.MedicationId);
 
+    }
+
+    // Override SaveChanges to update audit fields
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        OnBeforeSaving();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        OnBeforeSaving();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void OnBeforeSaving()
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
+        var utcNow = DateTime.UtcNow;
+
+        foreach (var entry in entries)
+        {
+            // Check if the entity has 'CreatedAt' and 'UpdatedAt' properties
+            if (entry.Entity is Patient || entry.Entity is Doctor || entry.Entity is Medication || entry.Entity is Prescription || entry.Entity is PrescriptionItem)
+            {
+                var updatedAtProperty = entry.Property("UpdatedAt");
+                if (updatedAtProperty != null)
+                {
+                    updatedAtProperty.CurrentValue = utcNow;
+                }
+
+                if (entry.State == EntityState.Added)
+                {
+                    var createdAtProperty = entry.Property("CreatedAt");
+                    if (createdAtProperty != null)
+                    {
+                        createdAtProperty.CurrentValue = utcNow;
+                    }
+                }
+            }
+            // If you create a base class or interface for auditable entities,
+            // you can make this logic more generic and cleaner.
+            // Example with an interface IAuditable:
+            // if (entry.Entity is IAuditable auditableEntity)
+            // {
+            //     auditableEntity.UpdatedAt = utcNow;
+            //     if (entry.State == EntityState.Added)
+            //     {
+            //         auditableEntity.CreatedAt = utcNow;
+            //     }
+            // }
+        }
     }
 } 

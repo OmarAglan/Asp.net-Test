@@ -27,4 +27,11 @@ public class PrescriptionItem
     public string Instructions { get; set; } = string.Empty;
 
     public int? Refills { get; set; } // Number of allowed refills
+
+    [StringLength(500)]
+    public string? Notes { get; set; } // Added: Notes on the item (nullable)
+
+    // Audit Fields
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 } 
