@@ -17,6 +17,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // --- Register Repositories --------
 builder.Services.AddScoped<IMedicationRepository, MedicationRepository>();
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 // -----------------------------------
 
 builder.Services.AddRazorPages();

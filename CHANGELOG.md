@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.5.0] - YYYY-MM-DD
+
+### Added
+
+*   Scaffolded basic CRUD Razor Pages for Patient Management (`Pages/Patients`).
+*   Defined `IPatientRepository` interface.
+*   Implemented `PatientRepository` using `ApplicationDbContext`.
+*   Registered `IPatientRepository` for dependency injection.
+
+### Changed
+
+*   Refactored Patient CRUD pages (`Pages/Patients/*`) to use `IPatientRepository` instead of direct `DbContext` access.
+*   Added navigation link for Patients to `_Layout.cshtml`.
+
 ## [0.4.0] - YYYY-MM-DD
 
 ### Added

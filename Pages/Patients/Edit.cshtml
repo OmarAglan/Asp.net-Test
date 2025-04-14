@@ -1,0 +1,84 @@
+@page
+@model Roshta.Pages_Patients.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Patient</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Patient.Id" />
+            <div class="form-group">
+                <span class="text-danger">*</span>
+                <label asp-for="Patient.Name" class="control-label"></label>
+                <input asp-for="Patient.Name" class="form-control" />
+                <span asp-validation-for="Patient.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                
+                <label asp-for="Patient.DateOfBirth" class="control-label"></label>
+                <input asp-for="Patient.DateOfBirth" class="form-control" />
+                <span asp-validation-for="Patient.DateOfBirth" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                
+                <label asp-for="Patient.ContactInfo" class="control-label"></label>
+                <input asp-for="Patient.ContactInfo" class="form-control" />
+                <span asp-validation-for="Patient.ContactInfo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                
+                <label asp-for="Patient.VisitCount" class="control-label"></label>
+                <input asp-for="Patient.VisitCount" class="form-control" />
+                <span asp-validation-for="Patient.VisitCount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                
+                <label asp-for="Patient.LastVisitDate" class="control-label"></label>
+                <input asp-for="Patient.LastVisitDate" class="form-control" />
+                <span asp-validation-for="Patient.LastVisitDate" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Patient.HasOutstandingBalance" /> @Html.DisplayNameFor(model => model.Patient.HasOutstandingBalance)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Patient.IsActive" /> @Html.DisplayNameFor(model => model.Patient.IsActive)
+                </label>
+            </div>
+            <div class="form-group">
+                
+                <label asp-for="Patient.CreatedAt" class="control-label"></label>
+                <input asp-for="Patient.CreatedAt" class="form-control" />
+                <span asp-validation-for="Patient.CreatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                
+                <label asp-for="Patient.UpdatedAt" class="control-label"></label>
+                <input asp-for="Patient.UpdatedAt" class="form-control" />
+                <span asp-validation-for="Patient.UpdatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
