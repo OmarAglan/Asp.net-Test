@@ -21,7 +21,7 @@ This document outlines the planned development phases and features for the Rosht
 
 1.  **Repository/Service Layer (Optional):**
     *   Implement data access abstraction.
-2.  **Medication Management:**
+2.  **Medication Management:** (Scaffolded basic pages)
     *   Create Razor Pages (List, Add, Edit, Delete).
     *   Implement backend logic.
 3.  **Doctor Management:**
