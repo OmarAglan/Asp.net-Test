@@ -4,7 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.3.0] - 2025-04-14
+## [0.4.0] - YYYY-MM-DD
+
+### Added
+
+*   Defined `IMedicationRepository` interface.
+*   Implemented `MedicationRepository` using `ApplicationDbContext`.
+*   Registered `IMedicationRepository` for dependency injection.
+
+### Changed
+
+*   Refactored Medication CRUD pages (`Pages/Medications/*`) to use `IMedicationRepository` instead of direct `DbContext` access.
+
+## [0.3.0] - 2025-04-13
 
 ### Added
 

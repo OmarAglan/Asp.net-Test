@@ -8,16 +8,17 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Roshta.Data;
 using Roshta.Models;
+using Roshta.Repositories.Interfaces;
 
 namespace Roshta.Pages_Medications
 {
     public class EditModel : PageModel
     {
-        private readonly Roshta.Data.ApplicationDbContext _context;
+        private readonly IMedicationRepository _medicationRepository;
 
-        public EditModel(Roshta.Data.ApplicationDbContext context)
+        public EditModel(IMedicationRepository medicationRepository)
         {
-            _context = context;
+            _medicationRepository = medicationRepository;
         }
 
         [BindProperty]
@@ -30,7 +31,7 @@ namespace Roshta.Pages_Medications
                 return NotFound();
             }
 
-            var medication =  await _context.Medications.FirstOrDefaultAsync(m => m.Id == id);
+            var medication = await _medicationRepository.GetByIdAsync(id.Value);
             if (medication == null)
             {
                 return NotFound();
@@ -48,15 +49,13 @@ namespace Roshta.Pages_Medications
                 return Page();
             }
 
-            _context.Attach(Medication).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _medicationRepository.UpdateAsync(Medication);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!MedicationExists(Medication.Id))
+                if (!await MedicationExistsAsync(Medication.Id))
                 {
                     return NotFound();
                 }
@@ -69,9 +68,9 @@ namespace Roshta.Pages_Medications
             return RedirectToPage("./Index");
         }
 
-        private bool MedicationExists(int id)
+        private async Task<bool> MedicationExistsAsync(int id)
         {
-            return _context.Medications.Any(e => e.Id == id);
+            return await _medicationRepository.ExistsAsync(id);
         }
     }
 }

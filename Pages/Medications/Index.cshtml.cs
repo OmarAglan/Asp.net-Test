@@ -1,29 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using Roshta.Data;
 using Roshta.Models;
+using Roshta.Repositories.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Roshta.Pages_Medications
 {
     public class IndexModel : PageModel
     {
-        private readonly Roshta.Data.ApplicationDbContext _context;
+        private readonly IMedicationRepository _medicationRepository;
 
-        public IndexModel(Roshta.Data.ApplicationDbContext context)
+        public IndexModel(IMedicationRepository medicationRepository)
         {
-            _context = context;
+            _medicationRepository = medicationRepository;
         }
 
         public IList<Medication> Medication { get;set; } = default!;
 
         public async Task OnGetAsync()
         {
-            Medication = await _context.Medications.ToListAsync();
+            Medication = (await _medicationRepository.GetAllAsync()).ToList();
         }
     }
 }

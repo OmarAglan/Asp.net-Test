@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Roshta.Data;
+using Roshta.Repositories;
+using Roshta.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
+// -----------------------------------
+
+// --- Register Repositories --------
+builder.Services.AddScoped<IMedicationRepository, MedicationRepository>();
 // -----------------------------------
 
 builder.Services.AddRazorPages();

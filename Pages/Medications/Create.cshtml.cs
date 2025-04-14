@@ -1,22 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Roshta.Data;
 using Roshta.Models;
+using Roshta.Repositories.Interfaces;
+using System.Threading.Tasks;
 
 namespace Roshta.Pages_Medications
 {
     public class CreateModel : PageModel
     {
-        private readonly Roshta.Data.ApplicationDbContext _context;
+        private readonly IMedicationRepository _medicationRepository;
 
-        public CreateModel(Roshta.Data.ApplicationDbContext context)
+        public CreateModel(IMedicationRepository medicationRepository)
         {
-            _context = context;
+            _medicationRepository = medicationRepository;
         }
 
         public IActionResult OnGet()
@@ -35,8 +31,7 @@ namespace Roshta.Pages_Medications
                 return Page();
             }
 
-            _context.Medications.Add(Medication);
-            await _context.SaveChangesAsync();
+            await _medicationRepository.AddAsync(Medication);
 
             return RedirectToPage("./Index");
         }

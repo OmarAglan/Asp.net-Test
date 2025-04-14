@@ -1,22 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using Roshta.Data;
 using Roshta.Models;
+using Roshta.Repositories.Interfaces;
+using System.Threading.Tasks;
 
 namespace Roshta.Pages_Medications
 {
     public class DeleteModel : PageModel
     {
-        private readonly Roshta.Data.ApplicationDbContext _context;
+        private readonly IMedicationRepository _medicationRepository;
 
-        public DeleteModel(Roshta.Data.ApplicationDbContext context)
+        public DeleteModel(IMedicationRepository medicationRepository)
         {
-            _context = context;
+            _medicationRepository = medicationRepository;
         }
 
         [BindProperty]
@@ -29,16 +25,17 @@ namespace Roshta.Pages_Medications
                 return NotFound();
             }
 
-            var medication = await _context.Medications.FirstOrDefaultAsync(m => m.Id == id);
+            var medication = await _medicationRepository.GetByIdAsync(id.Value);
 
-            if (medication is not null)
+            if (medication == null)
+            {
+                return NotFound();
+            }
+            else
             {
                 Medication = medication;
-
-                return Page();
             }
-
-            return NotFound();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(int? id)
@@ -48,13 +45,7 @@ namespace Roshta.Pages_Medications
                 return NotFound();
             }
 
-            var medication = await _context.Medications.FindAsync(id);
-            if (medication != null)
-            {
-                Medication = medication;
-                _context.Medications.Remove(Medication);
-                await _context.SaveChangesAsync();
-            }
+            await _medicationRepository.DeleteAsync(id.Value);
 
             return RedirectToPage("./Index");
         }

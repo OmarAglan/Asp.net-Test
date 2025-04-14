@@ -19,9 +19,9 @@ This document outlines the planned development phases and features for the Rosht
 
 ## Phase 2: Core CRUD Functionality & UI
 
-1.  **Repository/Service Layer (Optional):**
+1.  **Repository/Service Layer (Optional):** (Implemented Repository for Medications)
     *   Implement data access abstraction.
-2.  **Medication Management:** (Scaffolded basic pages)
+2.  **Medication Management:** (Refactored to use Repository)
     *   Create Razor Pages (List, Add, Edit, Delete).
     *   Implement backend logic.
 3.  **Doctor Management:**
