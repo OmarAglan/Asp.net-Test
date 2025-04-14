@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.5.0] - YYYY-MM-DD
+## [0.5.0] - 2025-04-14
 
 ### Added
 
@@ -18,7 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 *   Refactored Patient CRUD pages (`Pages/Patients/*`) to use `IPatientRepository` instead of direct `DbContext` access.
 *   Added navigation link for Patients to `_Layout.cshtml`.
 
-## [0.4.0] - YYYY-MM-DD
+## [0.4.0] - 2025-04-14
 
 ### Added
 
