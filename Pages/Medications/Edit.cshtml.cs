@@ -8,17 +8,17 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Roshta.Data;
 using Roshta.Models;
-using Roshta.Repositories.Interfaces;
+using Roshta.Services.Interfaces;
 
 namespace Roshta.Pages_Medications
 {
     public class EditModel : PageModel
     {
-        private readonly IMedicationRepository _medicationRepository;
+        private readonly IMedicationService _medicationService;
 
-        public EditModel(IMedicationRepository medicationRepository)
+        public EditModel(IMedicationService medicationService)
         {
-            _medicationRepository = medicationRepository;
+            _medicationService = medicationService;
         }
 
         [BindProperty]
@@ -31,7 +31,7 @@ namespace Roshta.Pages_Medications
                 return NotFound();
             }
 
-            var medication = await _medicationRepository.GetByIdAsync(id.Value);
+            var medication = await _medicationService.GetMedicationByIdAsync(id.Value);
             if (medication == null)
             {
                 return NotFound();
@@ -51,7 +51,7 @@ namespace Roshta.Pages_Medications
 
             try
             {
-                await _medicationRepository.UpdateAsync(Medication);
+                await _medicationService.UpdateMedicationAsync(Medication);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -70,7 +70,7 @@ namespace Roshta.Pages_Medications
 
         private async Task<bool> MedicationExistsAsync(int id)
         {
-            return await _medicationRepository.ExistsAsync(id);
+            return await _medicationService.MedicationExistsAsync(id);
         }
     }
 }

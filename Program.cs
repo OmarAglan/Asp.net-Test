@@ -25,6 +25,8 @@ builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
 
 // --- Register Services ------------
 builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
+builder.Services.AddScoped<IMedicationService, MedicationService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
 // -----------------------------------
 
 builder.Services.AddRazorPages();

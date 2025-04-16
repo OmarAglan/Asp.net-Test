@@ -7,24 +7,24 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Roshta.Data;
 using Roshta.Models;
-using Roshta.Repositories.Interfaces;
+using Roshta.Services.Interfaces;
 
 namespace Roshta.Pages_Patients
 {
     public class IndexModel : PageModel
     {
-        private readonly IPatientRepository _patientRepository;
+        private readonly IPatientService _patientService;
 
-        public IndexModel(IPatientRepository patientRepository)
+        public IndexModel(IPatientService patientService)
         {
-            _patientRepository = patientRepository;
+            _patientService = patientService;
         }
 
         public IList<Patient> Patient { get;set; } = default!;
 
         public async Task OnGetAsync()
         {
-            Patient = (await _patientRepository.GetAllAsync()).ToList();
+            Patient = (await _patientService.GetAllPatientsAsync()).ToList();
         }
     }
 }

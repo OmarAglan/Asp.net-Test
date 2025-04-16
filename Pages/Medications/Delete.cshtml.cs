@@ -1,18 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Roshta.Models;
-using Roshta.Repositories.Interfaces;
+using Roshta.Services.Interfaces;
 using System.Threading.Tasks;
 
 namespace Roshta.Pages_Medications
 {
     public class DeleteModel : PageModel
     {
-        private readonly IMedicationRepository _medicationRepository;
+        private readonly IMedicationService _medicationService;
 
-        public DeleteModel(IMedicationRepository medicationRepository)
+        public DeleteModel(IMedicationService medicationService)
         {
-            _medicationRepository = medicationRepository;
+            _medicationService = medicationService;
         }
 
         [BindProperty]
@@ -25,7 +25,7 @@ namespace Roshta.Pages_Medications
                 return NotFound();
             }
 
-            var medication = await _medicationRepository.GetByIdAsync(id.Value);
+            var medication = await _medicationService.GetMedicationByIdAsync(id.Value);
 
             if (medication == null)
             {
@@ -45,7 +45,7 @@ namespace Roshta.Pages_Medications
                 return NotFound();
             }
 
-            await _medicationRepository.DeleteAsync(id.Value);
+            await _medicationService.DeleteMedicationAsync(id.Value);
 
             return RedirectToPage("./Index");
         }

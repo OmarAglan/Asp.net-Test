@@ -7,17 +7,17 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Roshta.Data;
 using Roshta.Models;
-using Roshta.Repositories.Interfaces;
+using Roshta.Services.Interfaces;
 
 namespace Roshta.Pages_Patients
 {
     public class DetailsModel : PageModel
     {
-        private readonly IPatientRepository _patientRepository;
+        private readonly IPatientService _patientService;
 
-        public DetailsModel(IPatientRepository patientRepository)
+        public DetailsModel(IPatientService patientService)
         {
-            _patientRepository = patientRepository;
+            _patientService = patientService;
         }
 
         public Patient Patient { get; set; } = default!;
@@ -29,7 +29,7 @@ namespace Roshta.Pages_Patients
                 return NotFound();
             }
 
-            var patient = await _patientRepository.GetByIdAsync(id.Value);
+            var patient = await _patientService.GetPatientByIdAsync(id.Value);
             if (patient == null)
             {
                 return NotFound();

@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.7.0] - YYYY-MM-DD
+
+### Added
+
+*   Defined `IMedicationService` and `IPatientService` interfaces.
+*   Implemented `MedicationService` and `PatientService` using respective repositories.
+*   Registered services for dependency injection.
+
+### Changed
+
+*   Refactored Medication CRUD pages (`Pages/Medications/*`) to use `IMedicationService`.
+*   Refactored Patient CRUD pages (`Pages/Patients/*`) to use `IPatientService`.
+
 ## [0.6.0] - YYYY-MM-DD
 
 ### Added

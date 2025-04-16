@@ -1,18 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Roshta.Models;
-using Roshta.Repositories.Interfaces;
+using Roshta.Services.Interfaces;
 using System.Threading.Tasks;
 
 namespace Roshta.Pages_Medications
 {
     public class CreateModel : PageModel
     {
-        private readonly IMedicationRepository _medicationRepository;
+        private readonly IMedicationService _medicationService;
 
-        public CreateModel(IMedicationRepository medicationRepository)
+        public CreateModel(IMedicationService medicationService)
         {
-            _medicationRepository = medicationRepository;
+            _medicationService = medicationService;
         }
 
         public IActionResult OnGet()
@@ -31,7 +31,7 @@ namespace Roshta.Pages_Medications
                 return Page();
             }
 
-            await _medicationRepository.AddAsync(Medication);
+            await _medicationService.AddMedicationAsync(Medication);
 
             return RedirectToPage("./Index");
         }

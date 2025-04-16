@@ -7,17 +7,17 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Roshta.Data;
 using Roshta.Models;
-using Roshta.Repositories.Interfaces;
+using Roshta.Services.Interfaces;
 
 namespace Roshta.Pages_Patients
 {
     public class DeleteModel : PageModel
     {
-        private readonly IPatientRepository _patientRepository;
+        private readonly IPatientService _patientService;
 
-        public DeleteModel(IPatientRepository patientRepository)
+        public DeleteModel(IPatientService patientService)
         {
-            _patientRepository = patientRepository;
+            _patientService = patientService;
         }
 
         [BindProperty]
@@ -30,7 +30,7 @@ namespace Roshta.Pages_Patients
                 return NotFound();
             }
 
-            var patient = await _patientRepository.GetByIdAsync(id.Value);
+            var patient = await _patientService.GetPatientByIdAsync(id.Value);
 
             if (patient == null)
             {
@@ -49,8 +49,8 @@ namespace Roshta.Pages_Patients
             {
                 return NotFound();
             }
-            
-            await _patientRepository.DeleteAsync(id.Value);
+
+            await _patientService.DeletePatientAsync(id.Value);
 
             return RedirectToPage("./Index");
         }

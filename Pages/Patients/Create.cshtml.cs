@@ -7,17 +7,17 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Roshta.Data;
 using Roshta.Models;
-using Roshta.Repositories.Interfaces;
+using Roshta.Services.Interfaces;
 
 namespace Roshta.Pages_Patients
 {
     public class CreateModel : PageModel
     {
-        private readonly IPatientRepository _patientRepository;
+        private readonly IPatientService _patientService;
 
-        public CreateModel(IPatientRepository patientRepository)
+        public CreateModel(IPatientService patientService)
         {
-            _patientRepository = patientRepository;
+            _patientService = patientService;
         }
 
         public IActionResult OnGet()
@@ -36,7 +36,7 @@ namespace Roshta.Pages_Patients
                 return Page();
             }
 
-            await _patientRepository.AddAsync(Patient);
+            await _patientService.AddPatientAsync(Patient);
 
             return RedirectToPage("./Index");
         }
