@@ -9,15 +9,17 @@ public class LicenseService : ILicenseService
 {
     private readonly LicenseSettings _licenseSettings;
     private readonly string _activationFlagPath; // Path to the activation marker file
+    private readonly string _doctorIdFlagPath;   // Path to store the configured doctor ID
+
+    // Cache the Doctor ID to avoid reading the file repeatedly
+    private int? _cachedDoctorId = null;
+    private bool _doctorIdChecked = false;
 
     public LicenseService(IOptions<LicenseSettings> licenseSettingsOptions)
     {
-        _licenseSettings = licenseSettingsOptions.Value; 
-
-        // Define where the activation flag file will be stored.
-        // Using AppContext.BaseDirectory places it alongside the application executable.
-        // Consider Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) for a user-specific location later.
-        _activationFlagPath = Path.Combine(AppContext.BaseDirectory, ".activated"); 
+        _licenseSettings = licenseSettingsOptions.Value;
+        _activationFlagPath = Path.Combine(AppContext.BaseDirectory, ".activated");
+        _doctorIdFlagPath = Path.Combine(AppContext.BaseDirectory, ".doctorid");
     }
 
     public bool ValidateLicense(string enteredRegistrationNumber, string enteredSerialNumber)
@@ -45,11 +47,66 @@ public class LicenseService : ILicenseService
             // The content doesn't matter, only its existence.
             File.Create(_activationFlagPath).Dispose(); // Dispose releases the file handle immediately
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // TODO: Log the exception (ex)
             // Handle potential file system errors (permissions, etc.)
             // For now, activation might fail silently if the file can't be created.
         }
+    }
+
+    // --- New Methods --- 
+
+    public bool IsProfileSetup()
+    {
+        // Profile is setup if the Doctor ID file exists and contains a valid integer
+        return GetCurrentDoctorId() != null;
+    }
+
+    public void MarkProfileAsSetup(int doctorId)
+    {
+        try
+        {
+            // Store the Doctor ID in the flag file.
+            File.WriteAllText(_doctorIdFlagPath, doctorId.ToString());
+            // Reset cache
+            _cachedDoctorId = doctorId;
+            _doctorIdChecked = true;
+        }
+        catch (Exception)
+        {
+            // TODO: Log the exception (ex)
+            // Handle potential file system errors
+        }
+    }
+
+    public int? GetCurrentDoctorId()
+    {
+        // Return cached value if already checked
+        if (_doctorIdChecked)
+        {
+            return _cachedDoctorId;
+        }
+
+        _doctorIdChecked = true; // Mark as checked even if file doesn't exist or is invalid
+        if (File.Exists(_doctorIdFlagPath))
+        {
+            try
+            {
+                string content = File.ReadAllText(_doctorIdFlagPath);
+                if (int.TryParse(content, out int id))
+                {
+                    _cachedDoctorId = id;
+                    return id;
+                }
+            }
+            catch (Exception)
+            {
+                 // TODO: Log the exception (ex)
+            }
+        }
+        
+        _cachedDoctorId = null;
+        return null;
     }
 } 

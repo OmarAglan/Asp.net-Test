@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Roshta.Services.Interfaces
+@inject ILicenseService LicenseService
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -37,6 +40,13 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Prescriptions/Create">New Prescription</a>
                         </li>
+                        
+                        @if (LicenseService.IsActivated() && LicenseService.IsProfileSetup())
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/DoctorProfile/Edit">Edit Profile</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

@@ -61,9 +61,9 @@ public class ActivateModel : PageModel
         {
             _logger.LogInformation("License validation successful. Marking as activated.");
             _licenseService.MarkAsActivated();
-            TempData["SuccessMessage"] = "Application activated successfully!";
-            // Redirect to the main page or perhaps a Doctor Profile setup page later
-            return RedirectToPage("/Index"); 
+            TempData["SuccessMessage"] = "Application activated successfully! Please complete your profile.";
+            // Redirect to the profile setup page now
+            return RedirectToPage("/DoctorProfile/Setup"); 
         }
         else
         {

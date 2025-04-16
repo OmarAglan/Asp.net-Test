@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.9.5] - YYYY-MM-DD
+
+### Added
+
+*   Created `Pages/DoctorProfile/Setup.cshtml` and `.cs` for initial doctor profile setup after activation.
+*   Created `Pages/DoctorProfile/Edit.cshtml` and `.cs` for editing the doctor profile after setup.
+*   Added `GetDoctorProfileAsync(int)` and `UpdateDoctorProfileAsync(int, DoctorProfileInputModel)` methods to `IDoctorService`/`DoctorService` and `IDoctorRepository`/`DoctorRepository`.
+*   Added "Edit Profile" link to the main navigation in `_Layout.cshtml`, visible only after activation and profile setup.
+
+### Changed
+
+*   Updated `ActivationCheckPageFilter` to redirect to `/DoctorProfile/Setup` if activated but profile is not set up.
+*   Updated `ActivationCheckPageFilter` to redirect from `/Activate` page to `/Index` (or `/DoctorProfile/Setup`) if already activated.
+*   Updated `README.md` and `ROADMAP.md` to reflect current features and progress.
+
+### Fixed
+
+*   Corrected `RedirectToPageResult` calls in `ActivationCheckPageFilter` to use correct page routes (e.g., `/DoctorProfile/Setup`) instead of file paths.
+
 ## [0.9.0] - YYYY-MM-DD
 
 ### Added
@@ -101,26 +120,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-*   Refined core data models with suggestions (e.g., `IsActive` flags, `Prescription.Status` changed to enum).
-
-## [0.1.0] - 2025-04-13
-
-### Added
-
-*   Initial project setup using ASP.NET Core 9 Razor Pages template.
-*   Integrated Entity Framework Core with SQLite (`roshta.db`).
-*   Defined core data models: `Patient`, `Doctor`, `Medication`, `Prescription`, `PrescriptionItem`.
-*   Created initial database migration (`InitialCreate`).
-*   Added `README.md`, `ROADMAP.md`, and `.gitignore`.
-*   Created this `CHANGELOG.md`.
-
-### Changed
-
-*   Updated target framework from .NET 7 to .NET 9.
-*   Renamed project and namespaces from `Test1` to `Roshta`.
-*   Updated default logging in `Program.cs` (reverted incorrect attempt).
-
-### Fixed
-
-*   Resolved issues with `dotnet ef` tool installation and usage.
-*   Fixed build errors after namespace renaming. 
+*   Refined core data models with suggestions (e.g., `

@@ -7,6 +7,7 @@ using Roshta.Services.Interfaces;
 using Roshta.ViewModels;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace Roshta.Pages.Prescriptions
 {
@@ -15,15 +16,21 @@ namespace Roshta.Pages.Prescriptions
         private readonly IPrescriptionService _prescriptionService;
         private readonly IPatientRepository _patientRepository;
         private readonly IMedicationRepository _medicationRepository;
+        private readonly ILicenseService _licenseService;
+        private readonly ILogger<CreateModel> _logger;
 
         public CreateModel(
             IPrescriptionService prescriptionService,
             IPatientRepository patientRepository,
-            IMedicationRepository medicationRepository)
+            IMedicationRepository medicationRepository,
+            ILicenseService licenseService,
+            ILogger<CreateModel> logger)
         {
             _prescriptionService = prescriptionService;
             _patientRepository = patientRepository;
             _medicationRepository = medicationRepository;
+            _licenseService = licenseService;
+            _logger = logger;
         }
 
         // Properties to hold data for the form
@@ -52,13 +59,20 @@ namespace Roshta.Pages.Prescriptions
                 return Page();
             }
 
-            // --- TODO: Get Doctor ID from Authenticated User --- 
-            // Hardcoding DoctorId = 1 for now. Replace this when authentication is implemented.
-            // You might fetch the Doctor based on the logged-in user's identity.
-            int currentDoctorId = 1; 
+            // --- Get Doctor ID from License Service --- 
+            int? currentDoctorId = _licenseService.GetCurrentDoctorId();
+            if (currentDoctorId == null)
+            {
+                // This shouldn't happen if the ActivationCheckFilter is working correctly,
+                // but handle it defensively.
+                _logger.LogError("Could not retrieve Doctor ID for prescription creation. Profile might not be set up.");
+                ModelState.AddModelError(string.Empty, "Cannot create prescription. Doctor profile not found.");
+                await OnGetAsync(); // Re-populate lists
+                return Page();
+            }
             // ---------------------------------------------------
 
-            var createdPrescription = await _prescriptionService.CreatePrescriptionAsync(PrescriptionCreate, currentDoctorId);
+            var createdPrescription = await _prescriptionService.CreatePrescriptionAsync(PrescriptionCreate, currentDoctorId.Value);
 
             if (createdPrescription == null)
             {
@@ -72,7 +86,7 @@ namespace Roshta.Pages.Prescriptions
             // Redirect to a details page (or index for now) upon successful creation
             // TODO: Create a Details page later and redirect there: return RedirectToPage("./Details", new { id = createdPrescription.Id });
             TempData["SuccessMessage"] = "Prescription created successfully!"; // Add success message
-            return RedirectToPage("/Index"); // Redirect to site home for now
+            return RedirectToPage("./Index"); // Redirect to prescription list now
         }
     }
 } 

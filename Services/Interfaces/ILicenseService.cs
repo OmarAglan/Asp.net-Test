@@ -20,4 +20,22 @@ public interface ILicenseService
     /// Marks the application as activated (e.g., after successful validation).
     /// </summary>
     void MarkAsActivated();
+
+    /// <summary>
+    /// Checks if the doctor profile has been set up after activation.
+    /// </summary>
+    /// <returns>True if profile is set up, false otherwise.</returns>
+    bool IsProfileSetup();
+
+    /// <summary>
+    /// Marks the profile as set up and stores the associated Doctor ID.
+    /// </summary>
+    /// <param name="doctorId">The ID of the saved Doctor profile.</param>
+    void MarkProfileAsSetup(int doctorId);
+
+    /// <summary>
+    /// Gets the ID of the currently configured/licensed doctor.
+    /// </summary>
+    /// <returns>The Doctor ID if set up, otherwise null.</returns>
+    int? GetCurrentDoctorId();
 } 

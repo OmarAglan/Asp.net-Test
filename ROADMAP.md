@@ -50,10 +50,10 @@ This document outlines the planned development phases and features for the Rosht
 
 ## Phase 4: Enhancements & Advanced Features
 
-1.  **Doctor Profile Management:**
-    *   Implement mechanism to create/update the single licensed `Doctor` profile after successful activation.
-    *   Store/retrieve the activated `DoctorId` for use in other features (e.g., Prescription creation).
-    *   Create page(s) for the licensed doctor to view/edit their own details.
+1.  **Doctor Profile Management:** (Initial Implementation - Completed)
+    *   Implement mechanism to create/update the single licensed `Doctor` profile after successful activation. (Completed - via `/DoctorProfile/Setup`)
+    *   Store/retrieve the activated `DoctorId` for use in other features (e.g., Prescription creation). (Completed - via `ILicenseService`)
+    *   Create page(s) for the licensed doctor to view/edit their own details. (Completed - via `/DoctorProfile/Edit`)
 2.  **Search & Filtering:**
     *   Implement search/filtering for Patients, Medications, Prescriptions.
 3.  **Validation:**

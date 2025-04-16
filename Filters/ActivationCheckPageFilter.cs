@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Roshta.Services.Interfaces;
 using System.Threading.Tasks;
+using System;
 
 namespace Roshta.Filters;
 
@@ -27,24 +28,74 @@ public class ActivationCheckPageFilter : IAsyncPageFilter
     {
         // Get the path of the page being accessed
         string pagePath = context.ActionDescriptor.RelativePath;
+        string activatePagePhysicalPath = "/Pages/Activate.cshtml"; // Keep physical path for comparison
+        string setupPagePhysicalPath = "/Pages/DoctorProfile/Setup.cshtml"; // Keep physical path for comparison
 
-        // Allow access to the Activation page itself without checking
-        if (pagePath.Equals("/Pages/Activate.cshtml", StringComparison.OrdinalIgnoreCase))
+        string activatePageRoute = "/Activate"; // Correct route for redirection
+        string setupPageRoute = "/DoctorProfile/Setup"; // Correct route for redirection
+
+        // Allow access to Activation page if not activated
+        if (pagePath.Equals(activatePagePhysicalPath, StringComparison.OrdinalIgnoreCase))
         {
-            await next(); // Proceed to the Activation page handler
+            // If already activated, redirect away from activation page itself
+            if (_licenseService.IsActivated())
+            {
+                 _logger.LogInformation("Already activated. Redirecting away from Activate page.");
+                 // Check if profile setup is needed before redirecting
+                 if(!_licenseService.IsProfileSetup())
+                 {
+                    _logger.LogInformation("Profile not set up. Redirecting to Setup page.");
+                    context.Result = new RedirectToPageResult(setupPageRoute); // Use correct route
+                    return;
+                 }
+                 else 
+                 {
+                    _logger.LogInformation("Profile set up. Redirecting to Index page.");
+                    context.Result = new RedirectToPageResult("/Index"); 
+                    return;
+                 }
+            }
+            // If not activated, allow access to the activation page
+            _logger.LogDebug("Not activated. Allowing access to Activate page.");
+            await next(); 
             return;
         }
 
-        // Check if the application is activated
+        // --- Check Activation Status for other pages ---
         if (!_licenseService.IsActivated())
         {
-            _logger.LogInformation("Application not activated. Redirecting to /Activate from {PagePath}.", pagePath);
-            // Not activated, redirect to the activation page
-            context.Result = new RedirectToPageResult("/Activate");
-            return; // Short-circuit the pipeline
+            _logger.LogInformation("Application not activated. Redirecting to {ActivatePage} from {PagePath}.", activatePageRoute, pagePath);
+            context.Result = new RedirectToPageResult(activatePageRoute); // Use correct route
+            return; 
         }
 
-        // Activated, proceed to the intended page handler
+        // --- Activated: Now Check Profile Setup ---
+
+        // Allow access to Setup page itself if profile isn't set up yet
+        if (pagePath.Equals(setupPagePhysicalPath, StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogDebug("Accessing Setup page directly.");
+             if (_licenseService.IsProfileSetup())
+            {
+                _logger.LogInformation("Profile already set up. Redirecting from Setup page to Index.");
+                context.Result = new RedirectToPageResult("/Index"); // Or main page
+                return;
+            }
+            // Allow access if profile is not set up
+            await next();
+            return;
+        }
+        
+        // If activated BUT profile not set up, redirect other pages to setup page
+        if (!_licenseService.IsProfileSetup())
+        {
+            _logger.LogInformation("Profile not set up. Redirecting to {SetupPage} from {PagePath}.", setupPageRoute, pagePath);
+             context.Result = new RedirectToPageResult(setupPageRoute); // Use correct route
+            return;
+        }
+
+        // Activated and Profile is Set up - proceed with the original request
+        _logger.LogDebug("Activated and profile set up. Proceeding with request for {PagePath}.", pagePath);
         await next();
     }
 } 

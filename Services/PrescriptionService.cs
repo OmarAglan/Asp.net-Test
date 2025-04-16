@@ -2,6 +2,7 @@ using Roshta.Models;
 using Roshta.Repositories.Interfaces;
 using Roshta.Services.Interfaces;
 using Roshta.ViewModels;
+using Microsoft.Extensions.Logging;
 
 namespace Roshta.Services;
 
@@ -11,12 +12,15 @@ public class PrescriptionService : IPrescriptionService
     private readonly IPatientRepository _patientRepository; // To validate PatientId
     // private readonly IDoctorRepository _doctorRepository; // Needed later when we have Doctor repo
     // Potentially IMedicationRepository if validation is needed here
+    private readonly ILogger<PrescriptionService> _logger;
 
     public PrescriptionService(IPrescriptionRepository prescriptionRepository,
-                               IPatientRepository patientRepository)
+                               IPatientRepository patientRepository,
+                               ILogger<PrescriptionService> logger)
     {
         _prescriptionRepository = prescriptionRepository;
         _patientRepository = patientRepository;
+        _logger = logger;
     }
 
     public async Task<Prescription?> CreatePrescriptionAsync(PrescriptionCreateModel model, int doctorId)
@@ -71,8 +75,8 @@ public class PrescriptionService : IPrescriptionService
             await _prescriptionRepository.AddPrescriptionAsync(prescription);
             return prescription; // Return the created prescription (with its new Id)
         }
-        catch (Exception ex)
-        {   
+        catch (Exception)
+        {
             // TODO: Add proper logging of the exception (ex)
             // Handle potential database errors
             return null;
@@ -83,7 +87,15 @@ public class PrescriptionService : IPrescriptionService
     public async Task<IEnumerable<Prescription>> GetAllPrescriptionsAsync()
     {
         // TODO: Add filtering logic here later (e.g., by logged-in doctorId)
-        return await _prescriptionRepository.GetAllPrescriptionsAsync();
+        try
+        {
+            return await _prescriptionRepository.GetAllPrescriptionsAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred while getting prescriptions: {ex.Message}");
+            return new List<Prescription>();
+        }
     }
 
     // Add implementation for GetPrescriptionByIdAsync
