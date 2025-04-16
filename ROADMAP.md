@@ -32,7 +32,7 @@ This document outlines the planned development phases and features for the Rosht
     *   Create a Razor Page for issuing a new Prescription.
     *   Include fields for selecting Patient, adding multiple Medications.
     *   Implement backend logic (likely requires Service Layer).
-5.  **Prescription Viewing:**
+5.  **Prescription Viewing:** (Implemented Index and Details pages)
     *   Create Razor Pages to List all prescriptions (for the logged-in doctor).
     *   Create a Razor Page to view the Details of a specific prescription.
 

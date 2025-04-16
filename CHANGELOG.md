@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.8.0] - YYYY-MM-DD
+
+### Added
+
+*   Created `Pages/Prescriptions/Index.cshtml` and `.cs` for listing prescriptions.
+*   Created `Pages/Prescriptions/Details.cshtml` and `.cs` for viewing prescription details (including items).
+*   Updated `IPrescriptionService` and `PrescriptionService` with methods for retrieving prescriptions.
+*   Added navigation link for Prescriptions list to `_Layout.cshtml`.
+
 ## [0.7.0] - YYYY-MM-DD
 
 ### Added

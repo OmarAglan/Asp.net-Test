@@ -78,4 +78,17 @@ public class PrescriptionService : IPrescriptionService
             return null;
         }
     }
+
+    // Add implementation for GetAllPrescriptionsAsync
+    public async Task<IEnumerable<Prescription>> GetAllPrescriptionsAsync()
+    {
+        // TODO: Add filtering logic here later (e.g., by logged-in doctorId)
+        return await _prescriptionRepository.GetAllPrescriptionsAsync();
+    }
+
+    // Add implementation for GetPrescriptionByIdAsync
+    public async Task<Prescription?> GetPrescriptionByIdAsync(int id)
+    {
+        return await _prescriptionRepository.GetPrescriptionByIdAsync(id);
+    }
 } 

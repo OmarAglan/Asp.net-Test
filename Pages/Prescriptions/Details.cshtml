@@ -1,0 +1,98 @@
+@page "{id:int?}"
+@model Roshta.Pages.Prescriptions.DetailsModel
+
+@{ 
+    ViewData["Title"] = "Prescription Details";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (Model.Prescription == null)
+{
+    <div class="alert alert-danger">Prescription not found.</div>
+    <a asp-page="./Index">Back to List</a>
+}
+else
+{
+    <div>
+        <h4>Prescription Information</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Prescription.Patient)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Prescription.Patient.Name)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Prescription.Doctor)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Prescription.Doctor.Name)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Prescription.DateIssued)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Prescription.DateIssued)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Prescription.ExpiryDate)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Prescription.ExpiryDate)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Prescription.NextAppointmentDate)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Prescription.NextAppointmentDate)
+            </dd>
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Prescription.Status)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Prescription.Status)
+            }
+        </dl>
+    </div>
+
+    <div class="mt-4">
+        <h4>Medication Items</h4>
+        @if (!Model.Prescription.PrescriptionItems.Any())
+        {
+            <div class="alert alert-secondary">No medication items found for this prescription.</div>
+        }
+        else
+        {
+            <table class="table table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th>Medication</th>
+                        <th>Quantity</th>
+                        <th>Instructions</th>
+                        <th>Refills</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Prescription.PrescriptionItems)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Medication.Name)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Instructions)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Refills)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <div class="mt-3">
+        <a asp-page="./Index" class="btn btn-outline-secondary">Back to List</a>
+        @* Add Edit/Delete buttons here later if needed *@
+    </div>
+}
