@@ -17,7 +17,7 @@ This document outlines the planned development phases and features for the Rosht
 4.  **Basic Seeding (Optional):**
     *   Add initial test data.
 
-## Phase 2: Core CRUD Functionality & UI
+## Phase 2: Core CRUD Functionality & UI (Completed)
 
 1.  **Repository/Service Layer (Optional):** (Implemented Repository & Service layers for Medications & Patients)
     *   Implement data access abstraction.
@@ -36,21 +36,24 @@ This document outlines the planned development phases and features for the Rosht
     *   Create Razor Pages to List all prescriptions (for the logged-in doctor).
     *   Create a Razor Page to view the Details of a specific prescription.
 
-## Phase 3: Authentication & Authorization
+## Phase 3: Licensing & Activation (Initial Implementation - Completed)
 
-1.  **Identity Setup:**
-    *   Integrate ASP.NET Core Identity.
-    *   Configure Identity services and `DbContext` (link Identity User to `Doctor` model).
-    *   Scaffold Identity UI (Register, Login, etc. - Registration creates the Doctor record).
-    *   Apply Identity migrations.
-2.  **Authorization & Subscription:**
-    *   Implement checks based on `Doctor.IsSubscribed` status to potentially limit features.
-    *   Secure pages/actions (e.g., only logged-in doctors can access functionality).
+1.  **License Key Storage (Temporary):**
+    *   Store the expected unique Registration/Serial number pair **in `appsettings.json` for initial development**. **(Note: Must be replaced with a secure method like DPAPI or Online Activation before release)**.
+2.  **License Service:**
+    *   Create `ILicenseService` and `LicenseService` to read expected keys from `appsettings.json` and validate entered keys.
+    *   Implement logic to track activation status (e.g., simple local file flag).
+3.  **Activation UI:**
+    *   Create `Pages/Activate.cshtml` page for user to input license keys.
+4.  **Activation Check Middleware/Filter:**
+    *   Implement logic to check activation status on startup/request and redirect to Activation page if needed.
 
 ## Phase 4: Enhancements & Advanced Features
 
 1.  **Doctor Profile Management:**
-    *   Create page(s) for the logged-in doctor to view/edit their own details (`Doctor` model).
+    *   Implement mechanism to create/update the single licensed `Doctor` profile after successful activation.
+    *   Store/retrieve the activated `DoctorId` for use in other features (e.g., Prescription creation).
+    *   Create page(s) for the licensed doctor to view/edit their own details.
 2.  **Search & Filtering:**
     *   Implement search/filtering for Patients, Medications, Prescriptions.
 3.  **Validation:**
@@ -86,6 +89,7 @@ This document outlines the planned development phases and features for the Rosht
     *   Analyze and optimize database queries.
     *   Implement caching.
 2.  **Security Hardening:**
-    *   Review and enhance security measures.
+    *   **Replace Temporary License Storage:** Implement a secure license validation and storage mechanism (e.g., using Windows DPAPI for local encrypted storage, or implementing an Online Activation server).
+    *   Review security practices (e.g., input validation, protection against common web vulnerabilities).
 3.  **Code Refactoring:**
     *   Improve code quality and maintainability. 

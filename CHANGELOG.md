@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.9.0] - YYYY-MM-DD
+
+### Added
+
+*   Added temporary license key storage in `appsettings.json` and `LicenseSettings` model.
+*   Created `ILicenseService` and `LicenseService` for license validation and activation status (using simple file flag).
+*   Created `Pages/Activate.cshtml` and `.cs` for user license key input.
+*   Implemented `ActivationCheckPageFilter` (global Razor Page filter) to enforce activation.
+*   Registered `LicenseService` and `ActivationCheckPageFilter`.
+
+### Fixed
+
+*   Resolved ambiguous route issue for the `/Activate` page.
+
 ## [0.8.0] - YYYY-MM-DD
 
 ### Added

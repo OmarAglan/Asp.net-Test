@@ -1,0 +1,45 @@
+@page
+@model Roshta.Pages.ActivateModel
+@{
+    ViewData["Title"] = "Activate Application";
+    // Use a simpler layout potentially, or no layout if preferred for activation
+    // Layout = "_LayoutSimple"; 
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="text-center">@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    <p class="text-center">Please enter your license details to activate the application.</p>
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Input.RegistrationNumber" class="form-label"></label>
+                            <input asp-for="Input.RegistrationNumber" class="form-control" placeholder="e.g., REG-12345-ABCDE" />
+                            <span asp-validation-for="Input.RegistrationNumber" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Input.SerialNumber" class="form-label"></label>
+                            <input asp-for="Input.SerialNumber" class="form-control" placeholder="e.g., SN-XYZ-98765" />
+                            <span asp-validation-for="Input.SerialNumber" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Activate</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+} 

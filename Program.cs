@@ -4,8 +4,14 @@ using Roshta.Repositories;
 using Roshta.Repositories.Interfaces;
 using Roshta.Services;
 using Roshta.Services.Interfaces;
+using Roshta.Settings;
+using Roshta.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure settings
+builder.Services.Configure<LicenseSettings>(
+    builder.Configuration.GetSection(LicenseSettings.SectionName));
 
 // Add services to the container.
 
@@ -27,9 +33,15 @@ builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
 builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
 builder.Services.AddScoped<IMedicationService, MedicationService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<ILicenseService, LicenseService>();
 // -----------------------------------
 
-builder.Services.AddRazorPages();
+// Configure Razor Pages and add the global filter
+builder.Services.AddRazorPages()
+.AddMvcOptions(options =>
+{
+    options.Filters.Add<ActivationCheckPageFilter>();
+});
 
 var app = builder.Build();
 
