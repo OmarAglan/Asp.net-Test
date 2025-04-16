@@ -1,0 +1,233 @@
+@page
+@model Roshta.Pages.Prescriptions.CreateModel
+
+@{ 
+    // Using the correct namespace from the PageModel file
+    ViewData["Title"] = "Create Prescription";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-8"> 
+        <form method="post" id="prescriptionForm">
+            @Html.AntiForgeryToken() 
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <h4>Prescription Details</h4>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="PrescriptionCreate.PatientId" class="control-label"></label>
+                    <select asp-for="PrescriptionCreate.PatientId" class="form-select" asp-items="Model.PatientSelectList">
+                        <option value="">-- Select Patient --</option>
+                    </select>
+                    <span asp-validation-for="PrescriptionCreate.PatientId" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="PrescriptionCreate.ExpiryDate" class="control-label"></label>
+                    <input asp-for="PrescriptionCreate.ExpiryDate" class="form-control" />
+                    <span asp-validation-for="PrescriptionCreate.ExpiryDate" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                 <div class="col-md-6">
+                    <label asp-for="PrescriptionCreate.NextAppointmentDate" class="control-label"></label>
+                    <input asp-for="PrescriptionCreate.NextAppointmentDate" class="form-control" />
+                    <span asp-validation-for="PrescriptionCreate.NextAppointmentDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <hr />
+
+            <h4>Medication Items</h4>
+            
+            <!-- Section for adding a new item -->
+            <div class="card mb-3" id="addItemSection">
+                <div class="card-header">Add Medication</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="selectMedication" class="form-label">Medication</label>
+                            <select id="selectMedication" class="form-select" asp-items="Model.MedicationSelectList"> 
+                                <option value="">-- Select Medication --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="inputQuantity" class="form-label">Quantity</label>
+                            <input type="text" id="inputQuantity" class="form-control" />
+                        </div>
+                         <div class="col-md-2">
+                            <label for="inputRefills" class="form-label">Refills</label>
+                            <input type="number" id="inputRefills" class="form-control" />
+                        </div>
+                        <div class="col-md-12">
+                            <label for="inputInstructions" class="form-label">Instructions</label>
+                            <textarea id="inputInstructions" class="form-control" rows="2"></textarea>
+                        </div>
+                       <div class="col-md-12">
+                            <label for="inputNotes" class="form-label">Notes (Optional)</label>
+                            <input type="text" id="inputNotes" class="form-control" />
+                        </div>
+                        <div class="col-12">
+                            <button type="button" id="btnAddItem" class="btn btn-secondary">Add Item to Prescription</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section where added items will be displayed -->
+            <h5>Added Items:</h5>
+            <table class="table table-sm" id="prescriptionItemsTable">
+                <thead>
+                    <tr>
+                        <th>Medication</th>
+                        <th>Quantity</th>
+                        <th>Instructions</th>
+                        <th>Refills</th>
+                        <th>Notes</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows for added items will be injected here by JavaScript -->
+                    <!-- Hidden input fields for model binding will also be added here -->
+                </tbody>
+            </table>
+            <div id="noItemsMessage" class="alert alert-warning" style="display: none;">No medication items added yet.</div>
+
+            <hr />
+
+            <div class="form-group mt-3">
+                <input type="submit" value="Create Prescription" class="btn btn-primary" />
+                <a asp-page="/Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Basic structure for JavaScript (needs implementation)
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnAddItem = document.getElementById('btnAddItem');
+            const itemsTableBody = document.querySelector('#prescriptionItemsTable tbody');
+            const prescriptionForm = document.getElementById('prescriptionForm');
+            const noItemsMessage = document.getElementById('noItemsMessage');
+            let itemIndex = 0; // Counter for naming hidden fields
+
+            function updateNoItemsMessage() {
+                noItemsMessage.style.display = itemsTableBody.rows.length === 0 ? 'block' : 'none';
+            }
+
+            btnAddItem.addEventListener('click', function () {
+                // 1. Get values from the input fields (selectMedication, inputQuantity, etc.)
+                const medicationSelect = document.getElementById('selectMedication');
+                const medicationId = medicationSelect.value;
+                const medicationName = medicationSelect.options[medicationSelect.selectedIndex].text;
+                const quantity = document.getElementById('inputQuantity').value;
+                const instructions = document.getElementById('inputInstructions').value;
+                const refills = document.getElementById('inputRefills').value || null; // Handle empty string
+                const notes = document.getElementById('inputNotes').value || null;
+
+                // 2. Basic Validation (more robust validation is recommended)
+                if (!medicationId || !quantity || !instructions) {
+                    alert('Please select a medication and enter quantity and instructions.');
+                    return;
+                }
+
+                // 3. Create table row to display the item
+                const newRow = itemsTableBody.insertRow();
+                newRow.innerHTML = `
+                    <td>${medicationName}</td>
+                    <td>${quantity}</td>
+                    <td>${instructions}</td>
+                    <td>${refills ?? ''}</td>
+                    <td>${notes ?? ''}</td>
+                    <td><button type="button" class="btn btn-danger btn-sm btn-remove-item">Remove</button></td>
+                `;
+
+                // 4. Create hidden input fields for model binding
+                function addHiddenInput(name, value) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    input.value = value ?? ''; // Ensure value is not null
+                    newRow.appendChild(input); // Append to row temporarily before moving
+                }
+                
+                addHiddenInput(`PrescriptionCreate.Items[${itemIndex}].MedicationId`, medicationId);
+                addHiddenInput(`PrescriptionCreate.Items[${itemIndex}].Quantity`, quantity);
+                addHiddenInput(`PrescriptionCreate.Items[${itemIndex}].Instructions`, instructions);
+                addHiddenInput(`PrescriptionCreate.Items[${itemIndex}].Refills`, refills);
+                addHiddenInput(`PrescriptionCreate.Items[${itemIndex}].Notes`, notes);
+
+                // Move hidden inputs to the form directly (often cleaner for complex forms)
+                 newRow.querySelectorAll('input[type="hidden"]').forEach(hiddenInput => {
+                    prescriptionForm.appendChild(hiddenInput);
+                });
+
+                // Add event listener to the new remove button
+                newRow.querySelector('.btn-remove-item').addEventListener('click', function() {
+                    // Remove corresponding hidden fields
+                    const currentItemIndex = Array.from(itemsTableBody.rows).indexOf(newRow);
+                    prescriptionForm.querySelectorAll(`input[name^='PrescriptionCreate.Items[${currentItemIndex}]']`).forEach(inp => inp.remove());
+                    
+                    // Remove table row
+                    newRow.remove();
+                    
+                    // Renumber subsequent hidden fields (Important!)
+                    renumberHiddenFields();
+                    updateNoItemsMessage();
+                });
+
+                // 5. Clear input fields
+                medicationSelect.value = '';
+                document.getElementById('inputQuantity').value = '';
+                document.getElementById('inputInstructions').value = '';
+                document.getElementById('inputRefills').value = '';
+                document.getElementById('inputNotes').value = '';
+
+                itemIndex++; // Increment index for the next item
+                updateNoItemsMessage();
+            });
+
+            function renumberHiddenFields() {
+                const allHiddenInputs = prescriptionForm.querySelectorAll('input[type="hidden"][name^="PrescriptionCreate.Items"]');
+                const itemsData = {}; // Group by original index
+
+                allHiddenInputs.forEach(input => {
+                    const match = input.name.match(/Items\[(\d+)\]\.(\w+)/);
+                    if (match) {
+                        const index = match[1];
+                        const prop = match[2];
+                        if (!itemsData[index]) itemsData[index] = {};
+                        itemsData[index][prop] = input.value;
+                        input.remove(); // Remove old inputs
+                    }
+                });
+                
+                // Re-add inputs with sequential indices
+                let newIndex = 0;
+                const sortedIndices = Object.keys(itemsData).sort((a, b) => parseInt(a) - parseInt(b));
+                
+                sortedIndices.forEach(oldIndex => {
+                     const item = itemsData[oldIndex];
+                     for (const prop in item) {
+                         const input = document.createElement('input');
+                         input.type = 'hidden';
+                         input.name = `PrescriptionCreate.Items[${newIndex}].${prop}`;
+                         input.value = item[prop] ?? '';
+                         prescriptionForm.appendChild(input);
+                     }
+                     newIndex++;
+                });
+                itemIndex = newIndex; // Reset global index counter
+            }
+
+            // Initial state
+            updateNoItemsMessage(); 
+        });
+    </script>
+} 

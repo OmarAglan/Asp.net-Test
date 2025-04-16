@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Roshta.Data;
 using Roshta.Repositories;
 using Roshta.Repositories.Interfaces;
+using Roshta.Services;
+using Roshta.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // --- Register Repositories --------
 builder.Services.AddScoped<IMedicationRepository, MedicationRepository>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
+// -----------------------------------
+
+// --- Register Services ------------
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
 // -----------------------------------
 
 builder.Services.AddRazorPages();

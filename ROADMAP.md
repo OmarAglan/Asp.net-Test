@@ -28,7 +28,7 @@ This document outlines the planned development phases and features for the Rosht
     *   Create Razor Pages (List, Add, Edit, Delete).
     *   Implement Repository pattern.
     *   Implement backend logic.
-4.  **Prescription Creation:**
+4.  **Prescription Creation:** (Implemented basic create page using Service Layer)
     *   Create a Razor Page for issuing a new Prescription.
     *   Include fields for selecting Patient, adding multiple Medications.
     *   Implement backend logic (likely requires Service Layer).

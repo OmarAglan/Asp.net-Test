@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.6.0] - YYYY-MM-DD
+
+### Added
+
+*   Defined `IPrescriptionRepository` interface and `PrescriptionRepository` implementation.
+*   Defined `IPrescriptionService` interface and `PrescriptionService` implementation.
+*   Defined `PrescriptionCreateModel` ViewModel for prescription creation form.
+*   Created `Pages/Prescriptions/Create.cshtml` and `.cs` for adding new prescriptions, including basic JavaScript for dynamic medication item handling.
+*   Registered `IPrescriptionRepository` and `IPrescriptionService` for DI.
+
+### Changed
+
+*   Added navigation link for 'New Prescription' to `_Layout.cshtml`.
+
 ## [0.5.0] - 2025-04-14
 
 ### Added
