@@ -29,6 +29,15 @@ public class PrescriptionCreateModel
         [Required(ErrorMessage = "Please select a medication.")]
         public int MedicationId { get; set; }
 
+        [StringLength(100)]
+        public string? Dosage { get; set; }
+
+        [StringLength(100)]
+        public string? Frequency { get; set; }
+
+        [StringLength(100)]
+        public string? Duration { get; set; }
+
         [Required(ErrorMessage = "Quantity is required.")]
         [StringLength(50)]
         public string Quantity { get; set; } = string.Empty;

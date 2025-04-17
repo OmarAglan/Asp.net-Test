@@ -54,13 +54,16 @@ This document outlines the planned development phases and features for the Rosht
     *   Implement mechanism to create/update the single licensed `Doctor` profile after successful activation. (Completed - via `/DoctorProfile/Setup`)
     *   Store/retrieve the activated `DoctorId` for use in other features (e.g., Prescription creation). (Completed - via `ILicenseService`)
     *   Create page(s) for the licensed doctor to view/edit their own details. (Completed - via `/DoctorProfile/Edit`)
-2.  **Search & Filtering:**
-    *   Implement search/filtering for Patients, Medications, Prescriptions.
+2.  **Search & Filtering:** (Basic Implementation - Completed)
+    *   Implement search/filtering for Patients, Medications, Prescriptions. (Completed basic text search)
 3.  **Validation:**
     *   Add robust server-side and client-side validation.
 4.  **User Experience:**
     *   Improve UI/UX.
     *   Add user feedback.
+    *   Implement live search/autocomplete with debouncing for list pages (Patients, Medications, Prescriptions).
+        *   Client-side JavaScript (e.g., using `fetch` and debouncing).
+        *   Server-side endpoint (e.g., named page handler or API controller returning JSON).
 5.  **Desktop Application Experience (.NET MAUI Blazor Hybrid - Optional Future Step):**
     *   **Goal:** Package the application as an installable desktop app (.exe, .dmg, etc.) for a native feel.
     *   **Approach:** Utilize .NET MAUI Blazor Hybrid to host the existing web UI (Razor components) within a native app shell.

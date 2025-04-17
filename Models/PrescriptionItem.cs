@@ -18,6 +18,15 @@ public class PrescriptionItem
     [ForeignKey("MedicationId")]
     public virtual Medication Medication { get; set; } = null!;
 
+    [StringLength(100)]
+    public string? Dosage { get; set; }
+
+    [StringLength(100)]
+    public string? Frequency { get; set; }
+
+    [StringLength(100)]
+    public string? Duration { get; set; }
+
     [Required]
     [StringLength(50)] // e.g., "30 tablets", "1 bottle (100ml)"
     public string Quantity { get; set; } = string.Empty;

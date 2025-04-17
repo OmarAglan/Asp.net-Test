@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Roshta.Models;
 using Roshta.Services.Interfaces;
@@ -15,8 +16,21 @@ public class IndexModel : PageModel
 
     public IList<Prescription> PrescriptionList { get;set; } = new List<Prescription>();
 
+    [BindProperty(SupportsGet = true)]
+    public string? SearchString { get; set; }
+
     public async Task OnGetAsync()
     {
-        PrescriptionList = (await _prescriptionService.GetAllPrescriptionsAsync()).ToList();
+        IEnumerable<Prescription> prescriptions;
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            // TODO: Implement SearchPrescriptionsAsync in service/repo
+            prescriptions = await _prescriptionService.SearchPrescriptionsAsync(SearchString);
+        }
+        else
+        {
+            prescriptions = await _prescriptionService.GetAllPrescriptionsAsync();
+        }
+        PrescriptionList = prescriptions.ToList();
     }
 } 

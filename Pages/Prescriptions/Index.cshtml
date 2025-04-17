@@ -11,6 +11,17 @@
     <a asp-page="./Create" class="btn btn-success">Create New Prescription</a>
 </p>
 
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" placeholder="Search by Patient Name..." name="SearchString" value="@Model.SearchString">
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+        @if (!string.IsNullOrEmpty(Model.SearchString))
+        {
+            <a asp-page="./Index" class="btn btn-outline-secondary">Clear</a>
+        }
+    </div>
+</form>
+
 @if (!Model.PrescriptionList.Any())
 {
     <div class="alert alert-info">No prescriptions found.</div>

@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.9.6] - YYYY-MM-DD
+
+### Added
+
+*   Implemented basic search functionality (form submission) for Patients, Medications, and Prescriptions lists.
+*   Added `Dosage`, `Frequency`, and `Duration` fields to `PrescriptionItem` model and `PrescriptionItemCreateModel` view model.
+*   Added corresponding input fields to `Pages/Prescriptions/Create.cshtml` and updated JavaScript logic.
+*   Added EF Core migration `AddDosageFrequencyDurationToItem`.
+
+### Changed
+
+*   Updated `PatientService`, `MedicationService`, `PrescriptionService` and their interfaces to include `Search...Async` methods.
+*   Updated `PatientRepository`, `MedicationRepository`, `PrescriptionRepository` and their interfaces to include `SearchAsync` methods.
+*   Refactored method return types in `PatientRepository`/`IPatientRepository` and `MedicationRepository`/`IMedicationRepository` (Add/Update/Delete) for consistency.
+*   Renamed methods in `PrescriptionRepository`/`IPrescriptionRepository` for consistency.
+*   Updated `README.md` and `ROADMAP.md`.
+
+### Fixed
+
+*   Resolved build errors caused by mismatched method signatures between services, repositories, and interfaces after adding search functionality.
+*   Resolved build errors caused by incorrect field names in search query for Patients (`ContactInfo` instead of `ContactEmail`/`ContactPhone`).
+*   Resolved build errors caused by missing fields (`Dosage`, `Frequency`, `Duration`) in `PrescriptionItem` mapping within `PrescriptionService`.
+
 ## [0.9.5] - YYYY-MM-DD
 
 ### Added

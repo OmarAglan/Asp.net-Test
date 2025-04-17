@@ -27,6 +27,7 @@ To provide a system for doctors to issue and manage prescriptions, patients to v
     *   Prescriptions (linking Patients and Medications, associated with the current Doctor)
 *   **Data Validation:** Uses Data Annotations and Model Validation.
 *   **Service & Repository Pattern:** Business logic is separated using services and data access using repositories.
+*   **Basic Search:** Implemented simple text search on list pages for Patients (Name, ContactInfo), Medications (Name), and Prescriptions (Patient Name).
 
 ## Getting Started
 

@@ -2,14 +2,26 @@
 @model Roshta.Pages_Patients.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Patients";
 }
 
-<h1>Index</h1>
+<h1>Patients</h1>
 
 <p>
-    <a asp-page="Create">Create New</a>
+    <a asp-page="Create">Create New Patient</a>
 </p>
+
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" placeholder="Search by Name, Email, or Phone..." name="SearchString" value="@Model.SearchString">
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+        @if (!string.IsNullOrEmpty(Model.SearchString))
+        {
+            <a asp-page="./Index" class="btn btn-outline-secondary">Clear</a>
+        }
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>

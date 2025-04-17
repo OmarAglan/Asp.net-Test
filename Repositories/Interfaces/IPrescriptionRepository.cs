@@ -1,12 +1,15 @@
 using Roshta.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Roshta.Repositories.Interfaces;
 
 public interface IPrescriptionRepository
 {
     // We'll likely add Get methods later for viewing prescriptions
-    Task AddPrescriptionAsync(Prescription prescription); // Handles adding Prescription and its Items
-    Task<Prescription?> GetPrescriptionByIdAsync(int id); // Added for potential details view later
-    Task<IEnumerable<Prescription>> GetAllPrescriptionsAsync(); // Added for potential list view later
-
+    Task<IEnumerable<Prescription>> GetAllAsync(); // Renamed from GetAllPrescriptionsAsync
+    Task<IEnumerable<Prescription>> SearchAsync(string searchTerm); // Add this
+    Task<Prescription?> GetByIdAsync(int id); // Renamed from GetPrescriptionByIdAsync
+    Task<Prescription> AddAsync(Prescription prescription); // Renamed from CreatePrescriptionAsync
+    // Consider adding Update/Delete if needed
 } 

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Roshta.Data;
 using Roshta.Models;
 using Roshta.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Roshta.Pages_Patients
 {
@@ -22,9 +23,22 @@ namespace Roshta.Pages_Patients
 
         public IList<Patient> Patient { get;set; } = default!;
 
+        [BindProperty(SupportsGet = true)]
+        public string? SearchString { get; set; }
+
         public async Task OnGetAsync()
         {
-            Patient = (await _patientService.GetAllPatientsAsync()).ToList();
+            IEnumerable<Patient> patients;
+            if (!string.IsNullOrEmpty(SearchString))
+            {
+                // TODO: Implement SearchPatientsAsync in service/repo
+                patients = await _patientService.SearchPatientsAsync(SearchString);
+            }
+            else
+            {
+                patients = await _patientService.GetAllPatientsAsync();
+            }
+            Patient = patients.ToList();
         }
     }
 }

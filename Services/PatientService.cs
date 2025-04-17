@@ -19,27 +19,33 @@ public class PatientService : IPatientService
         return await _patientRepository.GetAllAsync();
     }
 
+    public async Task<IEnumerable<Patient>> SearchPatientsAsync(string searchTerm)
+    {
+        return await _patientRepository.SearchAsync(searchTerm);
+    }
+
     public async Task<Patient?> GetPatientByIdAsync(int id)
     {
         return await _patientRepository.GetByIdAsync(id);
     }
 
-    public async Task AddPatientAsync(Patient patient)
+    public async Task<Patient> AddPatientAsync(Patient patient)
     {
-        // Business logic/validation before saving
-        await _patientRepository.AddAsync(patient);
+        // Add any service-level validation or logic here
+        return await _patientRepository.AddAsync(patient);
     }
 
-    public async Task UpdatePatientAsync(Patient patient)
+    public async Task<Patient?> UpdatePatientAsync(Patient patient)
     {
-        // Business logic/validation before saving
-        await _patientRepository.UpdateAsync(patient);
+        // Add any service-level validation or logic here
+        var updated = await _patientRepository.UpdateAsync(patient);
+        return updated ? patient : null;
     }
 
-    public async Task DeletePatientAsync(int id)
+    public async Task<bool> DeletePatientAsync(int id)
     {
-        // Business logic (e.g., can't delete patient with outstanding balance?)
-        await _patientRepository.DeleteAsync(id);
+        // Add any service-level validation or logic here
+        return await _patientRepository.DeleteAsync(id);
     }
 
     public async Task<bool> PatientExistsAsync(int id)

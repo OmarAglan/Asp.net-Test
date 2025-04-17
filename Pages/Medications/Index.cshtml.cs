@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Roshta.Models;
 using Roshta.Services.Interfaces;
@@ -17,9 +18,22 @@ namespace Roshta.Pages_Medications
 
         public IList<Medication> Medication { get;set; } = default!;
 
+        [BindProperty(SupportsGet = true)]
+        public string? SearchString { get; set; }
+
         public async Task OnGetAsync()
         {
-            Medication = (await _medicationService.GetAllMedicationsAsync()).ToList();
+            IEnumerable<Medication> medications;
+            if (!string.IsNullOrEmpty(SearchString))
+            {
+                // TODO: Implement SearchMedicationsAsync in service/repo
+                medications = await _medicationService.SearchMedicationsAsync(SearchString);
+            }
+            else
+            {
+                medications = await _medicationService.GetAllMedicationsAsync();
+            }
+            Medication = medications.ToList();
         }
     }
 }

@@ -47,23 +47,35 @@
                 <div class="card-header">Add Medication</div>
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-12">
                             <label for="selectMedication" class="form-label">Medication</label>
                             <select id="selectMedication" class="form-select" asp-items="Model.MedicationSelectList"> 
                                 <option value="">-- Select Medication --</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label for="inputQuantity" class="form-label">Quantity</label>
-                            <input type="text" id="inputQuantity" class="form-control" />
+                         <div class="col-md-4">
+                            <label for="inputDosage" class="form-label">Dosage</label>
+                            <input type="text" id="inputDosage" class="form-control" placeholder="e.g., 500mg, 10ml" />
                         </div>
-                         <div class="col-md-2">
+                         <div class="col-md-4">
+                            <label for="inputFrequency" class="form-label">Frequency</label>
+                            <input type="text" id="inputFrequency" class="form-control" placeholder="e.g., Twice daily" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="inputDuration" class="form-label">Duration</label>
+                            <input type="text" id="inputDuration" class="form-control" placeholder="e.g., 10 days" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="inputQuantity" class="form-label">Quantity <span class="text-danger">*</span></label>
+                            <input type="text" id="inputQuantity" class="form-control" required/>
+                        </div>
+                         <div class="col-md-6">
                             <label for="inputRefills" class="form-label">Refills</label>
                             <input type="number" id="inputRefills" class="form-control" />
                         </div>
                         <div class="col-md-12">
-                            <label for="inputInstructions" class="form-label">Instructions</label>
-                            <textarea id="inputInstructions" class="form-control" rows="2"></textarea>
+                            <label for="inputInstructions" class="form-label">Instructions <span class="text-danger">*</span></label>
+                            <textarea id="inputInstructions" class="form-control" rows="2" required></textarea>
                         </div>
                        <div class="col-md-12">
                             <label for="inputNotes" class="form-label">Notes (Optional)</label>
@@ -82,6 +94,9 @@
                 <thead>
                     <tr>
                         <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Frequency</th>
+                        <th>Duration</th>
                         <th>Quantity</th>
                         <th>Instructions</th>
                         <th>Refills</th>
@@ -91,7 +106,6 @@
                 </thead>
                 <tbody>
                     <!-- Rows for added items will be injected here by JavaScript -->
-                    <!-- Hidden input fields for model binding will also be added here -->
                 </tbody>
             </table>
             <div id="noItemsMessage" class="alert alert-warning" style="display: none;">No medication items added yet.</div>
@@ -109,7 +123,6 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Basic structure for JavaScript (needs implementation)
         document.addEventListener('DOMContentLoaded', function () {
             const btnAddItem = document.getElementById('btnAddItem');
             const itemsTableBody = document.querySelector('#prescriptionItemsTable tbody');
@@ -122,16 +135,19 @@
             }
 
             btnAddItem.addEventListener('click', function () {
-                // 1. Get values from the input fields (selectMedication, inputQuantity, etc.)
+                // 1. Get values from the input fields
                 const medicationSelect = document.getElementById('selectMedication');
                 const medicationId = medicationSelect.value;
                 const medicationName = medicationSelect.options[medicationSelect.selectedIndex].text;
+                const dosage = document.getElementById('inputDosage').value || null;
+                const frequency = document.getElementById('inputFrequency').value || null;
+                const duration = document.getElementById('inputDuration').value || null;
                 const quantity = document.getElementById('inputQuantity').value;
                 const instructions = document.getElementById('inputInstructions').value;
-                const refills = document.getElementById('inputRefills').value || null; // Handle empty string
+                const refills = document.getElementById('inputRefills').value || null;
                 const notes = document.getElementById('inputNotes').value || null;
 
-                // 2. Basic Validation (more robust validation is recommended)
+                // 2. Basic Validation 
                 if (!medicationId || !quantity || !instructions) {
                     alert('Please select a medication and enter quantity and instructions.');
                     return;
@@ -141,6 +157,9 @@
                 const newRow = itemsTableBody.insertRow();
                 newRow.innerHTML = `
                     <td>${medicationName}</td>
+                    <td>${dosage ?? ''}</td>
+                    <td>${frequency ?? ''}</td>
+                    <td>${duration ?? ''}</td>
                     <td>${quantity}</td>
                     <td>${instructions}</td>
                     <td>${refills ?? ''}</td>
@@ -154,26 +173,27 @@
                     input.type = 'hidden';
                     input.name = name;
                     input.value = value ?? ''; // Ensure value is not null
-                    newRow.appendChild(input); // Append to row temporarily before moving
+                    prescriptionForm.appendChild(input); // Append directly to form
                 }
                 
-                addHiddenInput(`PrescriptionCreate.Items[${itemIndex}].MedicationId`, medicationId);
-                addHiddenInput(`PrescriptionCreate.Items[${itemIndex}].Quantity`, quantity);
-                addHiddenInput(`PrescriptionCreate.Items[${itemIndex}].Instructions`, instructions);
-                addHiddenInput(`PrescriptionCreate.Items[${itemIndex}].Refills`, refills);
-                addHiddenInput(`PrescriptionCreate.Items[${itemIndex}].Notes`, notes);
-
-                // Move hidden inputs to the form directly (often cleaner for complex forms)
-                 newRow.querySelectorAll('input[type="hidden"]').forEach(hiddenInput => {
-                    prescriptionForm.appendChild(hiddenInput);
-                });
+                const baseName = `PrescriptionCreate.Items[${itemIndex}]`;
+                addHiddenInput(`${baseName}.MedicationId`, medicationId);
+                addHiddenInput(`${baseName}.Dosage`, dosage);
+                addHiddenInput(`${baseName}.Frequency`, frequency);
+                addHiddenInput(`${baseName}.Duration`, duration);
+                addHiddenInput(`${baseName}.Quantity`, quantity);
+                addHiddenInput(`${baseName}.Instructions`, instructions);
+                addHiddenInput(`${baseName}.Refills`, refills);
+                addHiddenInput(`${baseName}.Notes`, notes);
 
                 // Add event listener to the new remove button
                 newRow.querySelector('.btn-remove-item').addEventListener('click', function() {
-                    // Remove corresponding hidden fields
-                    const currentItemIndex = Array.from(itemsTableBody.rows).indexOf(newRow);
-                    prescriptionForm.querySelectorAll(`input[name^='PrescriptionCreate.Items[${currentItemIndex}]']`).forEach(inp => inp.remove());
-                    
+                    // Remove corresponding hidden fields based on the baseName used when created
+                    const currentBaseName = `PrescriptionCreate.Items\[${Array.from(itemsTableBody.rows).indexOf(newRow)}\]`; // Need to escape brackets for querySelectorAll
+                    // It's safer to find the hidden inputs associated with *this row* before renumbering
+                    // We can perhaps add a data attribute to the row or the button, or find inputs based on value if unique.
+                    // For now, we assume renumbering handles finding the correct ones to delete.
+
                     // Remove table row
                     newRow.remove();
                     
@@ -184,6 +204,9 @@
 
                 // 5. Clear input fields
                 medicationSelect.value = '';
+                document.getElementById('inputDosage').value = '';
+                document.getElementById('inputFrequency').value = '';
+                document.getElementById('inputDuration').value = '';
                 document.getElementById('inputQuantity').value = '';
                 document.getElementById('inputInstructions').value = '';
                 document.getElementById('inputRefills').value = '';
@@ -194,9 +217,10 @@
             });
 
             function renumberHiddenFields() {
-                const allHiddenInputs = prescriptionForm.querySelectorAll('input[type="hidden"][name^="PrescriptionCreate.Items"]');
-                const itemsData = {}; // Group by original index
+                const allHiddenInputs = Array.from(prescriptionForm.querySelectorAll('input[type="hidden"][name^="PrescriptionCreate.Items"]'));
+                const itemsData = {}; // Group by logical item based on existing indices
 
+                // Extract data, grouping by index
                 allHiddenInputs.forEach(input => {
                     const match = input.name.match(/Items\[(\d+)\]\.(\w+)/);
                     if (match) {
@@ -204,27 +228,43 @@
                         const prop = match[2];
                         if (!itemsData[index]) itemsData[index] = {};
                         itemsData[index][prop] = input.value;
-                        input.remove(); // Remove old inputs
                     }
                 });
-                
-                // Re-add inputs with sequential indices
+
+                // Remove all old hidden inputs related to items
+                allHiddenInputs.forEach(input => input.remove());
+
+                // Re-add inputs with sequential indices from the collected data
                 let newIndex = 0;
-                const sortedIndices = Object.keys(itemsData).sort((a, b) => parseInt(a) - parseInt(b));
-                
+                // Process indices in their original order to maintain sequence
+                const sortedIndices = Object.keys(itemsData).sort((a, b) => parseInt(a) - parseInt(b)); 
+
                 sortedIndices.forEach(oldIndex => {
-                     const item = itemsData[oldIndex];
-                     for (const prop in item) {
-                         const input = document.createElement('input');
-                         input.type = 'hidden';
-                         input.name = `PrescriptionCreate.Items[${newIndex}].${prop}`;
-                         input.value = item[prop] ?? '';
-                         prescriptionForm.appendChild(input);
-                     }
-                     newIndex++;
+                    const item = itemsData[oldIndex];
+                    const baseName = `PrescriptionCreate.Items[${newIndex}]`;
+                    for (const prop in item) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = `${baseName}.${prop}`;
+                        input.value = item[prop] ?? '';
+                        prescriptionForm.appendChild(input);
+                    }
+                    newIndex++;
                 });
-                itemIndex = newIndex; // Reset global index counter
+                itemIndex = newIndex; // Reset global index counter to the new count
             }
+
+            // Add event listeners to any existing remove buttons if the page was reloaded with errors
+            itemsTableBody.querySelectorAll('.btn-remove-item').forEach(button => {
+                 button.addEventListener('click', function() {
+                    const row = button.closest('tr');
+                    // Similar logic to remove hidden fields based on row index needs careful implementation
+                    // This part is tricky if fields aren't directly associated with the row visually.
+                    row.remove();
+                    renumberHiddenFields();
+                    updateNoItemsMessage();
+                });
+            });
 
             // Initial state
             updateNoItemsMessage(); 

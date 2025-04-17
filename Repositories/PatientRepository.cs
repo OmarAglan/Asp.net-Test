@@ -23,6 +23,22 @@ public class PatientRepository : IPatientRepository
         return await _context.Patients.OrderBy(p => p.Name).ToListAsync();
     }
 
+    public async Task<IEnumerable<Patient>> SearchAsync(string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return await GetAllAsync(); // Return all if search term is empty
+        }
+
+        var lowerCaseSearchTerm = searchTerm.Trim().ToLower();
+
+        return await _context.Patients
+                             .Where(p => (p.Name != null && p.Name.ToLower().Contains(lowerCaseSearchTerm)) || 
+                                         (p.ContactInfo != null && p.ContactInfo.ToLower().Contains(lowerCaseSearchTerm)))
+                             .OrderBy(p => p.Name) // Keep consistent ordering
+                             .ToListAsync();
+    }
+
     public async Task<Patient?> GetByIdAsync(int id)
     {
         // Include related data if needed often, e.g., Prescriptions
@@ -30,30 +46,49 @@ public class PatientRepository : IPatientRepository
         return await _context.Patients.FindAsync(id);
     }
 
-    public async Task AddAsync(Patient patient)
+    public async Task<Patient> AddAsync(Patient patient)
     {
-        // Could add validation or default values here if not handled elsewhere
         await _context.Patients.AddAsync(patient);
         await _context.SaveChangesAsync();
+        return patient;
     }
 
-    public async Task UpdateAsync(Patient patient)
+    public async Task<bool> UpdateAsync(Patient patient)
     {
-        // The DbContext is already tracking the original entity if it was loaded
-        // Setting the state ensures it gets marked as modified if changes occurred.
         _context.Entry(patient).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return false;
+        }
+        catch (DbUpdateException)
+        {
+            return false;
+        }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        var patient = await GetByIdAsync(id);
-        if (patient != null)
+        var patient = await _context.Patients.FindAsync(id);
+        if (patient == null)
         {
-            _context.Patients.Remove(patient);
-            await _context.SaveChangesAsync();
+            return false;
         }
-        // Consider handling cases where deletion might be restricted (e.g., if patient has active prescriptions)
+        
+        _context.Patients.Remove(patient);
+        try
+        {
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (DbUpdateException)
+        {
+            return false;
+        }
     }
 
     public async Task<bool> ExistsAsync(int id)

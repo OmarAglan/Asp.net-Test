@@ -25,82 +25,64 @@ public class PrescriptionService : IPrescriptionService
 
     public async Task<Prescription?> CreatePrescriptionAsync(PrescriptionCreateModel model, int doctorId)
     {
-        // --- Validation --- 
-        // Ensure the selected patient exists
-        if (!await _patientRepository.ExistsAsync(model.PatientId))
-        {
-            // Handle error - perhaps return null or throw specific exception
-            // Consider adding logging here
-            return null; 
-        }
-
-        // TODO: Validate DoctorId when authentication/doctor repository is implemented
-        // if (!await _doctorRepository.ExistsAsync(doctorId)) return null;
-
-        // Ensure there are items to add
-        if (model.Items == null || !model.Items.Any())
-        {
-            // Handle error - no items added
-            return null;
-        }
-
-        // TODO: Validate that each MedicationId in model.Items exists?
-        // Might require IMedicationRepository dependency
-
-        // --- Mapping --- 
+        // Map ViewModel to Model
         var prescription = new Prescription
         {
             PatientId = model.PatientId,
-            DoctorId = doctorId, // Use the passed-in doctorId
-            DateIssued = DateTime.UtcNow, // Set by the service
+            DoctorId = doctorId, // Use the ID passed from the license service
+            DateIssued = DateTime.UtcNow, // Set issue date on creation
             ExpiryDate = model.ExpiryDate,
             NextAppointmentDate = model.NextAppointmentDate,
             Status = PrescriptionStatus.Active, // Default status
-            // CreatedAt/UpdatedAt handled by DbContext override
-
-            PrescriptionItems = model.Items.Select(itemModel => new PrescriptionItem
-            {
-                MedicationId = itemModel.MedicationId,
-                Quantity = itemModel.Quantity,
-                Instructions = itemModel.Instructions,
-                Refills = itemModel.Refills,
-                Notes = itemModel.Notes
-                // CreatedAt/UpdatedAt handled by DbContext override
-            }).ToList()
+            PrescriptionItems = new List<PrescriptionItem>()
         };
 
-        // --- Persistence --- 
-        try
+        // Add PrescriptionItems
+        foreach (var itemModel in model.Items)
         {
-            await _prescriptionRepository.AddPrescriptionAsync(prescription);
-            return prescription; // Return the created prescription (with its new Id)
+            if (itemModel.MedicationId > 0 && !string.IsNullOrWhiteSpace(itemModel.Instructions))
+            {
+                prescription.PrescriptionItems.Add(new PrescriptionItem
+                {
+                    MedicationId = itemModel.MedicationId,
+                    Dosage = itemModel.Dosage,
+                    Frequency = itemModel.Frequency,
+                    Duration = itemModel.Duration,
+                    Instructions = itemModel.Instructions,
+                    Prescription = prescription // Link back to parent
+                });
+            }
         }
-        catch (Exception)
+
+        // Validate (basic example - add more robust validation)
+        if (!prescription.PrescriptionItems.Any())
         {
-            // TODO: Add proper logging of the exception (ex)
-            // Handle potential database errors
-            return null;
+            throw new ArgumentException("Prescription must have at least one item.");
         }
+
+        // Save using the repository
+        return await _prescriptionRepository.AddAsync(prescription); // Use renamed method
     }
 
     // Add implementation for GetAllPrescriptionsAsync
     public async Task<IEnumerable<Prescription>> GetAllPrescriptionsAsync()
     {
-        // TODO: Add filtering logic here later (e.g., by logged-in doctorId)
-        try
-        {
-            return await _prescriptionRepository.GetAllPrescriptionsAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"An error occurred while getting prescriptions: {ex.Message}");
-            return new List<Prescription>();
-        }
+        // Enhance later to include Patient/Doctor info if needed for display
+        return await _prescriptionRepository.GetAllAsync(); // Use renamed method
+    }
+
+    public async Task<IEnumerable<Prescription>> SearchPrescriptionsAsync(string searchTerm)
+    {
+        // Implement search logic, potentially involving related entities
+        return await _prescriptionRepository.SearchAsync(searchTerm);
     }
 
     // Add implementation for GetPrescriptionByIdAsync
     public async Task<Prescription?> GetPrescriptionByIdAsync(int id)
     {
-        return await _prescriptionRepository.GetPrescriptionByIdAsync(id);
+        // Enhance later to include related items/patient/doctor
+        return await _prescriptionRepository.GetByIdAsync(id); // Use renamed method
     }
+
+    // Add Update/Delete service methods later if needed
 } 

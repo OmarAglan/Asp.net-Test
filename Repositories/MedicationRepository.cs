@@ -22,30 +22,68 @@ public class MedicationRepository : IMedicationRepository
         return await _context.Medications.ToListAsync();
     }
 
+    public async Task<IEnumerable<Medication>> SearchAsync(string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return await GetAllAsync(); // Return all if search term is empty
+        }
+
+        var lowerCaseSearchTerm = searchTerm.Trim().ToLower();
+
+        return await _context.Medications
+                             .Where(m => m.Name != null && m.Name.ToLower().Contains(lowerCaseSearchTerm))
+                             .OrderBy(m => m.Name) // Keep consistent ordering
+                             .ToListAsync();
+    }
+
     public async Task<Medication?> GetByIdAsync(int id)
     {
         return await _context.Medications.FindAsync(id);
     }
 
-    public async Task AddAsync(Medication medication)
+    public async Task<Medication> AddAsync(Medication medication)
     {
         await _context.Medications.AddAsync(medication);
-        await _context.SaveChangesAsync(); // Save changes here
+        await _context.SaveChangesAsync();
+        return medication;
     }
 
-    public async Task UpdateAsync(Medication medication)
+    public async Task<bool> UpdateAsync(Medication medication)
     {
         _context.Entry(medication).State = EntityState.Modified;
-        await _context.SaveChangesAsync(); // Save changes here
+        try
+        {
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return false;
+        }
+        catch (DbUpdateException)
+        {
+            return false;
+        }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        var medication = await GetByIdAsync(id);
-        if (medication != null)
+        var medication = await _context.Medications.FindAsync(id);
+        if (medication == null)
         {
-            _context.Medications.Remove(medication);
-            await _context.SaveChangesAsync(); // Save changes here
+            return false;
+        }
+        
+        _context.Medications.Remove(medication);
+        try
+        {
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (DbUpdateException)
+        {
+            return false;
         }
     }
 

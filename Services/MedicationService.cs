@@ -18,27 +18,33 @@ public class MedicationService : IMedicationService
         return await _medicationRepository.GetAllAsync();
     }
 
+    public async Task<IEnumerable<Medication>> SearchMedicationsAsync(string searchTerm)
+    {
+        return await _medicationRepository.SearchAsync(searchTerm);
+    }
+
     public async Task<Medication?> GetMedicationByIdAsync(int id)
     {
         return await _medicationRepository.GetByIdAsync(id);
     }
 
-    public async Task AddMedicationAsync(Medication medication)
+    public async Task<Medication> AddMedicationAsync(Medication medication)
     {
         // Add any medication-specific business logic/validation here in the future
-        await _medicationRepository.AddAsync(medication);
+        return await _medicationRepository.AddAsync(medication);
     }
 
-    public async Task UpdateMedicationAsync(Medication medication)
+    public async Task<Medication?> UpdateMedicationAsync(Medication medication)
     {
         // Add any medication-specific business logic/validation here in the future
-        await _medicationRepository.UpdateAsync(medication);
+        var updated = await _medicationRepository.UpdateAsync(medication);
+        return updated ? medication : null;
     }
 
-    public async Task DeleteMedicationAsync(int id)
+    public async Task<bool> DeleteMedicationAsync(int id)
     {
         // Add any medication-specific business logic/validation here (e.g., check if medication is in use)
-        await _medicationRepository.DeleteAsync(id);
+        return await _medicationRepository.DeleteAsync(id);
     }
 
     public async Task<bool> MedicationExistsAsync(int id)
