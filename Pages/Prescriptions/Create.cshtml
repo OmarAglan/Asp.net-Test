@@ -1,9 +1,12 @@
 @page
 @model Roshta.Pages.Prescriptions.CreateModel
+@using Roshta.ViewModels // Added for referencing PrescriptionItemCreateModel
 
-@{ 
-    // Using the correct namespace from the PageModel file
+@{
     ViewData["Title"] = "Create Prescription";
+    // Helper function to safely get medication name
+    Func<int, string> GetMedicationName = (id) =>
+        Model.MedicationSelectList?.FirstOrDefault(m => m.Value == id.ToString())?.Text ?? $"ID: {id} (Not Found)";
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -13,7 +16,8 @@
     <div class="col-md-8"> 
         <form method="post" id="prescriptionForm">
             @Html.AntiForgeryToken() 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @* Display validation summary for model-level errors (like item count) *@
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <h4>Prescription Details</h4>
             <div class="row mb-3">
@@ -36,61 +40,65 @@
                     <input asp-for="PrescriptionCreate.NextAppointmentDate" class="form-control" />
                     <span asp-validation-for="PrescriptionCreate.NextAppointmentDate" class="text-danger"></span>
                 </div>
+                 @* Placeholder for general form error message (e.g., if no items added) *@
+                 <div class="col-md-6 align-self-end">
+                    <span id="formSubmitError" class="text-danger"></span>
+                 </div>
             </div>
 
             <hr />
 
             <h4>Medication Items</h4>
-            
-            <!-- Section for adding a new item -->
+
+             <!-- Section for adding a new item -->
             <div class="card mb-3" id="addItemSection">
-                <div class="card-header">Add Medication</div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            <label for="selectMedication" class="form-label">Medication</label>
-                            <select id="selectMedication" class="form-select" asp-items="Model.MedicationSelectList"> 
-                                <option value="">-- Select Medication --</option>
-                            </select>
-                        </div>
+                 <div class="card-header">Add Medication</div>
+                 <div class="card-body">
+                     <div class="row g-3">
+                         <div class="col-md-12">
+                             <label for="selectMedication" class="form-label">Medication</label>
+                             <select id="selectMedication" class="form-select" asp-items="Model.MedicationSelectList"> 
+                                 <option value="">-- Select Medication --</option>
+                             </select>
+                         </div>
+                          <div class="col-md-4">
+                             <label for="inputDosage" class="form-label">Dosage</label>
+                             <input type="text" id="inputDosage" class="form-control" placeholder="e.g., 500mg, 10ml" />
+                         </div>
+                          <div class="col-md-4">
+                             <label for="inputFrequency" class="form-label">Frequency</label>
+                             <input type="text" id="inputFrequency" class="form-control" placeholder="e.g., Twice daily" />
+                         </div>
                          <div class="col-md-4">
-                            <label for="inputDosage" class="form-label">Dosage</label>
-                            <input type="text" id="inputDosage" class="form-control" placeholder="e.g., 500mg, 10ml" />
-                        </div>
-                         <div class="col-md-4">
-                            <label for="inputFrequency" class="form-label">Frequency</label>
-                            <input type="text" id="inputFrequency" class="form-control" placeholder="e.g., Twice daily" />
-                        </div>
-                        <div class="col-md-4">
-                            <label for="inputDuration" class="form-label">Duration</label>
-                            <input type="text" id="inputDuration" class="form-control" placeholder="e.g., 10 days" />
-                        </div>
-                        <div class="col-md-6">
-                            <label for="inputQuantity" class="form-label">Quantity <span class="text-danger">*</span></label>
-                            <input type="text" id="inputQuantity" class="form-control" required/>
-                        </div>
+                             <label for="inputDuration" class="form-label">Duration</label>
+                             <input type="text" id="inputDuration" class="form-control" placeholder="e.g., 10 days" />
+                         </div>
                          <div class="col-md-6">
-                            <label for="inputRefills" class="form-label">Refills</label>
-                            <input type="number" id="inputRefills" class="form-control" />
-                        </div>
+                             <label for="inputQuantity" class="form-label">Quantity <span class="text-danger">*</span></label>
+                             <input type="text" id="inputQuantity" class="form-control" />
+                         </div>
+                          <div class="col-md-6">
+                             <label for="inputRefills" class="form-label">Refills</label>
+                             <input type="number" id="inputRefills" class="form-control" />
+                         </div>
+                         <div class="col-md-12">
+                             <label for="inputInstructions" class="form-label">Instructions <span class="text-danger">*</span></label>
+                             <textarea id="inputInstructions" class="form-control" rows="2"></textarea>
+                         </div>
                         <div class="col-md-12">
-                            <label for="inputInstructions" class="form-label">Instructions <span class="text-danger">*</span></label>
-                            <textarea id="inputInstructions" class="form-control" rows="2" required></textarea>
-                        </div>
-                       <div class="col-md-12">
-                            <label for="inputNotes" class="form-label">Notes (Optional)</label>
-                            <input type="text" id="inputNotes" class="form-control" />
-                        </div>
-                        <div class="col-12">
-                            <button type="button" id="btnAddItem" class="btn btn-secondary">Add Item to Prescription</button>
-                        </div>
-                    </div>
-                </div>
+                             <label for="inputNotes" class="form-label">Notes (Optional)</label>
+                             <input type="text" id="inputNotes" class="form-control" />
+                         </div>
+                         <div class="col-12">
+                             <button type="button" id="btnAddItem" class="btn btn-secondary">Add Item to Prescription</button>
+                         </div>
+                     </div>
+                 </div>
             </div>
 
             <!-- Section where added items will be displayed -->
             <h5>Added Items:</h5>
-            <table class="table table-sm" id="prescriptionItemsTable">
+            <table class="table table-sm table-striped" id="prescriptionItemsTable">
                 <thead>
                     <tr>
                         <th>Medication</th>
@@ -105,16 +113,53 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Rows for added items will be injected here by JavaScript -->
+                    @* Render pre-populated items if copying *@
+                    @if (Model.PrescriptionCreate.Items != null)
+                    {
+                        @for (int i = 0; i < Model.PrescriptionCreate.Items.Count; i++)
+                        {
+                            var item = Model.PrescriptionCreate.Items[i];
+                            <tr>
+                                <td>@GetMedicationName(item.MedicationId)</td>
+                                <td>@item.Dosage</td>
+                                <td>@item.Frequency</td>
+                                <td>@item.Duration</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.Instructions</td>
+                                <td>@item.Refills</td>
+                                <td>@item.Notes</td>
+                                <td><button type="button" class="btn btn-danger btn-sm btn-remove-item">Remove</button></td>
+                            </tr>
+                        }
+                    }
                 </tbody>
             </table>
-            <div id="noItemsMessage" class="alert alert-warning" style="display: none;">No medication items added yet.</div>
+            @* Render hidden fields for pre-populated items outside the table but inside the form *@
+            @if (Model.PrescriptionCreate.Items != null)
+            {
+                @for (int i = 0; i < Model.PrescriptionCreate.Items.Count; i++)
+                {
+                    var item = Model.PrescriptionCreate.Items[i];
+                    <input type="hidden" name="PrescriptionCreate.Items[@i].MedicationId" value="@item.MedicationId" />
+                    <input type="hidden" name="PrescriptionCreate.Items[@i].Dosage" value="@item.Dosage" />
+                    <input type="hidden" name="PrescriptionCreate.Items[@i].Frequency" value="@item.Frequency" />
+                    <input type="hidden" name="PrescriptionCreate.Items[@i].Duration" value="@item.Duration" />
+                    <input type="hidden" name="PrescriptionCreate.Items[@i].Quantity" value="@item.Quantity" />
+                    <input type="hidden" name="PrescriptionCreate.Items[@i].Instructions" value="@item.Instructions" />
+                    <input type="hidden" name="PrescriptionCreate.Items[@i].Refills" value="@item.Refills" />
+                    <input type="hidden" name="PrescriptionCreate.Items[@i].Notes" value="@item.Notes" />
+                }
+            }
+            
+            @* Associate the validation message for the Items list here *@
+            <span asp-validation-for="PrescriptionCreate.Items" class="text-danger"></span> 
+            <div id="noItemsMessage" class="alert alert-warning mt-2" style="display: none;">No medication items added yet.</div>
 
             <hr />
 
             <div class="form-group mt-3">
                 <input type="submit" value="Create Prescription" class="btn btn-primary" />
-                <a asp-page="/Index" class="btn btn-outline-secondary">Cancel</a>
+                <a asp-page="/Prescriptions/Index" class="btn btn-outline-secondary">Cancel</a> 
             </div>
         </form>
     </div>
@@ -128,118 +173,46 @@
             const itemsTableBody = document.querySelector('#prescriptionItemsTable tbody');
             const prescriptionForm = document.getElementById('prescriptionForm');
             const noItemsMessage = document.getElementById('noItemsMessage');
-            let itemIndex = 0; // Counter for naming hidden fields
+            const formSubmitErrorSpan = document.getElementById('formSubmitError'); 
+
+            // Initialize index based on server-rendered hidden fields
+            let initialItemCount = prescriptionForm.querySelectorAll('input[type="hidden"][name^="PrescriptionCreate.Items"][name$="MedicationId"]').length;
+            let itemIndex = initialItemCount;
 
             function updateNoItemsMessage() {
-                noItemsMessage.style.display = itemsTableBody.rows.length === 0 ? 'block' : 'none';
+                const hasRows = itemsTableBody.rows.length > 0;
+                noItemsMessage.style.display = hasRows ? 'none' : 'block';
+            }
+            
+            // Function to add hidden input (simplified)
+            function addHiddenInput(name, value) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value ?? '';
+                prescriptionForm.appendChild(input);
             }
 
-            // Make the event listener async to use await for fetch
-            btnAddItem.addEventListener('click', async function () { 
-                // 1. Get values from the input fields
-                const medicationSelect = document.getElementById('selectMedication');
-                const medicationId = medicationSelect.value;
-                const medicationName = medicationSelect.options[medicationSelect.selectedIndex].text;
-                const dosage = document.getElementById('inputDosage').value || null;
-                const frequency = document.getElementById('inputFrequency').value || null;
-                const duration = document.getElementById('inputDuration').value || null;
-                const quantity = document.getElementById('inputQuantity').value;
-                const instructions = document.getElementById('inputInstructions').value;
-                const refills = document.getElementById('inputRefills').value || null;
-                const notes = document.getElementById('inputNotes').value || null;
-
-                // 2. Basic Client-Side Validation 
-                if (!medicationId || !quantity || !instructions) {
-                    alert('Please select a medication and enter quantity and instructions.');
-                    return;
-                }
-                
-                // *** NEW: Check if medication exists via AJAX ***
-                try {
-                    const response = await fetch(`?handler=CheckMedicationExists&id=${medicationId}`);
-                    if (!response.ok) {
-                         throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const data = await response.json();
-
-                    if (!data.exists) {
-                        alert(`Sorry, the selected medication '${medicationName}' is no longer available or invalid. Please choose another.`);
-                        // Optionally, remove the invalid item from the dropdown here
-                        // medicationSelect.querySelector(`option[value="${medicationId}"]`).remove();
-                        medicationSelect.value = ''; // Reset selection
-                        return; // Stop processing this item
-                    }
-                } catch (error) {
-                    console.error('Error checking medication existence:', error);
-                    alert('An error occurred while verifying the medication. Please try again.');
-                    return; // Stop processing on error
-                }
-                // *** END NEW ***
-
-                // 3. Create table row to display the item
-                const newRow = itemsTableBody.insertRow();
-                newRow.innerHTML = `
-                    <td>${medicationName}</td>
-                    <td>${dosage ?? ''}</td>
-                    <td>${frequency ?? ''}</td>
-                    <td>${duration ?? ''}</td>
-                    <td>${quantity}</td>
-                    <td>${instructions}</td>
-                    <td>${refills ?? ''}</td>
-                    <td>${notes ?? ''}</td>
-                    <td><button type="button" class="btn btn-danger btn-sm btn-remove-item">Remove</button></td>
-                `;
-
-                // 4. Create hidden input fields for model binding
-                function addHiddenInput(name, value) {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = name;
-                    input.value = value ?? ''; // Ensure value is not null
-                    prescriptionForm.appendChild(input); // Append directly to form
-                }
-                
-                const baseName = `PrescriptionCreate.Items[${itemIndex}]`;
-                addHiddenInput(`${baseName}.MedicationId`, medicationId);
-                addHiddenInput(`${baseName}.Dosage`, dosage);
-                addHiddenInput(`${baseName}.Frequency`, frequency);
-                addHiddenInput(`${baseName}.Duration`, duration);
-                addHiddenInput(`${baseName}.Quantity`, quantity);
-                addHiddenInput(`${baseName}.Instructions`, instructions);
-                addHiddenInput(`${baseName}.Refills`, refills);
-                addHiddenInput(`${baseName}.Notes`, notes);
-
-                // Add event listener to the new remove button
-                newRow.querySelector('.btn-remove-item').addEventListener('click', function() {
-                    // Remove corresponding hidden fields based on the baseName used when created
-                    const currentBaseName = `PrescriptionCreate.Items\[${Array.from(itemsTableBody.rows).indexOf(newRow)}\]`; // Need to escape brackets for querySelectorAll
-                    // It's safer to find the hidden inputs associated with *this row* before renumbering
-                    // We can perhaps add a data attribute to the row or the button, or find inputs based on value if unique.
-                    // For now, we assume renumbering handles finding the correct ones to delete.
-
-                    // Remove table row
-                    newRow.remove();
+            // Function to attach remove listener
+            function attachRemoveListener(button) {
+                 button.addEventListener('click', function() {
+                    const row = button.closest('tr');
+                    const rowIndex = Array.from(itemsTableBody.rows).indexOf(row); // Get current index before removing row
                     
-                    // Renumber subsequent hidden fields (Important!)
+                    // Remove the hidden fields FIRST - find based on index
+                    prescriptionForm.querySelectorAll(`input[type="hidden"][name^='PrescriptionCreate.Items[${rowIndex}]']`).forEach(inp => inp.remove());
+                    
+                    // Remove the visible table row
+                    row.remove();
+
+                    // Renumber the remaining hidden fields
                     renumberHiddenFields();
                     updateNoItemsMessage();
                 });
+            }
 
-                // 5. Clear input fields
-                medicationSelect.value = '';
-                document.getElementById('inputDosage').value = '';
-                document.getElementById('inputFrequency').value = '';
-                document.getElementById('inputDuration').value = '';
-                document.getElementById('inputQuantity').value = '';
-                document.getElementById('inputInstructions').value = '';
-                document.getElementById('inputRefills').value = '';
-                document.getElementById('inputNotes').value = '';
-
-                itemIndex++; // Increment index for the next item
-                updateNoItemsMessage();
-            });
-
-            function renumberHiddenFields() {
+            // Function to renumber hidden fields based on current DOM state
+             function renumberHiddenFields() {
                 const allHiddenInputs = Array.from(prescriptionForm.querySelectorAll('input[type="hidden"][name^="PrescriptionCreate.Items"]'));
                 const itemsData = {}; // Group by logical item based on existing indices
 
@@ -257,40 +230,158 @@
                 // Remove all old hidden inputs related to items
                 allHiddenInputs.forEach(input => input.remove());
 
-                // Re-add inputs with sequential indices from the collected data
+                // Re-add inputs with sequential indices (0, 1, 2...) from the collected data
                 let newIndex = 0;
-                // Process indices in their original order to maintain sequence
-                const sortedIndices = Object.keys(itemsData).sort((a, b) => parseInt(a) - parseInt(b)); 
+                // Get the keys (original indices) and sort them numerically to maintain order
+                const sortedIndices = Object.keys(itemsData).map(Number).sort((a, b) => a - b);
 
                 sortedIndices.forEach(oldIndex => {
-                    const item = itemsData[oldIndex];
+                    const item = itemsData[oldIndex.toString()]; // Use string key to access object
                     const baseName = `PrescriptionCreate.Items[${newIndex}]`;
                     for (const prop in item) {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = `${baseName}.${prop}`;
-                        input.value = item[prop] ?? '';
-                        prescriptionForm.appendChild(input);
+                         addHiddenInput(`${baseName}.${prop}`, item[prop]);
                     }
                     newIndex++;
                 });
-                itemIndex = newIndex; // Reset global index counter to the new count
+                itemIndex = newIndex; // Reset global index counter
             }
 
-            // Add event listeners to any existing remove buttons if the page was reloaded with errors
+             // Attach remove listeners to initially rendered buttons
             itemsTableBody.querySelectorAll('.btn-remove-item').forEach(button => {
-                 button.addEventListener('click', function() {
-                    const row = button.closest('tr');
-                    // Similar logic to remove hidden fields based on row index needs careful implementation
-                    // This part is tricky if fields aren't directly associated with the row visually.
-                    row.remove();
-                    renumberHiddenFields();
-                    updateNoItemsMessage();
-                });
+                attachRemoveListener(button);
             });
 
-            // Initial state
-            updateNoItemsMessage(); 
+
+            btnAddItem.addEventListener('click', async function () {
+                // --- (1. Get values - unchanged) ---
+                 const medicationSelect = document.getElementById('selectMedication');
+                 const medicationId = medicationSelect.value;
+                 const medicationName = medicationSelect.options[medicationSelect.selectedIndex].text;
+                 const dosage = document.getElementById('inputDosage').value || null;
+                 const frequency = document.getElementById('inputFrequency').value || null;
+                 const duration = document.getElementById('inputDuration').value || null;
+                 const quantity = document.getElementById('inputQuantity').value;
+                 const instructions = document.getElementById('inputInstructions').value;
+                 const refills = document.getElementById('inputRefills').value || null;
+                 const notes = document.getElementById('inputNotes').value || null;
+
+                // --- (2. Basic Client Validation - unchanged) ---
+                if (!medicationId || !quantity || !instructions) {
+                    alert('Please select a medication and enter quantity and instructions.');
+                    return;
+                }
+                
+                 // --- (AJAX Check - unchanged) ---
+                 try {
+                    const response = await fetch(`?handler=CheckMedicationExists&id=${medicationId}`);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    if (!data.exists) {
+                        alert(`Sorry, the selected medication '${medicationName}' is no longer available or invalid.`);
+                        medicationSelect.value = '';
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error checking medication existence:', error);
+                    alert('An error occurred verifying medication. Please try again.');
+                    return;
+                }
+
+                // --- (3. Create table row - unchanged) ---
+                const newRow = itemsTableBody.insertRow();
+                newRow.innerHTML = `
+                    <td>${medicationName}</td>
+                    <td>${dosage ?? ''}</td>
+                    <td>${frequency ?? ''}</td>
+                    <td>${duration ?? ''}</td>
+                    <td>${quantity}</td>
+                    <td>${instructions}</td>
+                    <td>${refills ?? ''}</td>
+                    <td>${notes ?? ''}</td>
+                    <td><button type="button" class="btn btn-danger btn-sm btn-remove-item">Remove</button></td>
+                `;
+
+                // --- (4. Create hidden fields) ---
+                const baseName = `PrescriptionCreate.Items[${itemIndex}]`; // Use current itemIndex
+                addHiddenInput(`${baseName}.MedicationId`, medicationId);
+                addHiddenInput(`${baseName}.Dosage`, dosage);
+                addHiddenInput(`${baseName}.Frequency`, frequency);
+                addHiddenInput(`${baseName}.Duration`, duration);
+                addHiddenInput(`${baseName}.Quantity`, quantity);
+                addHiddenInput(`${baseName}.Instructions`, instructions);
+                addHiddenInput(`${baseName}.Refills`, refills);
+                addHiddenInput(`${baseName}.Notes`, notes);
+
+                // --- (Attach listener - unchanged) ---
+                attachRemoveListener(newRow.querySelector('.btn-remove-item'));
+
+                // --- (5. Clear inputs - unchanged) ---
+                medicationSelect.value = '';
+                document.getElementById('inputDosage').value = '';
+                document.getElementById('inputFrequency').value = '';
+                document.getElementById('inputDuration').value = '';
+                document.getElementById('inputQuantity').value = '';
+                document.getElementById('inputInstructions').value = '';
+                document.getElementById('inputRefills').value = '';
+                document.getElementById('inputNotes').value = '';
+
+                itemIndex++; // Increment index for the next dynamically added item
+                updateNoItemsMessage();
+            });
+
+            // Client-side validation on final submit for item count
+            prescriptionForm.addEventListener('submit', function(event) {
+                 const hasItems = itemsTableBody.rows.length > 0;
+                 if (formSubmitErrorSpan) formSubmitErrorSpan.textContent = ''; // Clear previous error
+
+                 if (!hasItems) {
+                     event.preventDefault();
+                     const msg = 'Please add at least one medication item to the prescription before creating.';
+                     if (formSubmitErrorSpan) {
+                         formSubmitErrorSpan.textContent = msg;
+                     } else {
+                         alert(msg); // Fallback
+                     }
+                 }
+            });
+
+            // Client-side Date Validation
+            const expiryDateInput = document.getElementById('PrescriptionCreate_ExpiryDate');
+            const nextAppointmentDateInput = document.getElementById('PrescriptionCreate_NextAppointmentDate');
+            const expiryDateValidationSpan = document.querySelector('span[data-valmsg-for="PrescriptionCreate.ExpiryDate"]');
+            const nextAppointmentDateValidationSpan = document.querySelector('span[data-valmsg-for="PrescriptionCreate.NextAppointmentDate"]');
+
+            function validateDateIsFuture(inputElement, validationSpan) {
+                if (!inputElement || !validationSpan) return;
+                const dateValue = inputElement.value;
+                validationSpan.textContent = '';
+                if (dateValue) {
+                    try {
+                        const today = new Date();
+                        today.setUTCHours(0, 0, 0, 0);
+                        const parts = dateValue.split('-');
+                        const inputDate = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+                        if (inputDate <= today) {
+                            validationSpan.textContent = (inputElement.labels[0]?.textContent || 'Date') + ' must be in the future.';
+                        }
+                    } catch (e) {
+                        console.error("Error parsing date:", e);
+                        validationSpan.textContent = 'Invalid date format.';
+                    }
+                }
+            }
+
+            if (expiryDateInput) {
+                expiryDateInput.addEventListener('change', () => validateDateIsFuture(expiryDateInput, expiryDateValidationSpan));
+                expiryDateInput.addEventListener('blur', () => validateDateIsFuture(expiryDateInput, expiryDateValidationSpan));
+            }
+            if (nextAppointmentDateInput) {
+                nextAppointmentDateInput.addEventListener('change', () => validateDateIsFuture(nextAppointmentDateInput, nextAppointmentDateValidationSpan));
+                nextAppointmentDateInput.addEventListener('blur', () => validateDateIsFuture(nextAppointmentDateInput, nextAppointmentDateValidationSpan));
+            }
+
+            // Initial state check
+            updateNoItemsMessage();
         });
     </script>
 } 

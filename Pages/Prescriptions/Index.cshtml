@@ -1,5 +1,6 @@
 @page
 @model Roshta.Pages.Prescriptions.IndexModel
+@using Roshta.Models // Required for PrescriptionStatus enum
 
 @{ 
     ViewData["Title"] = "Prescriptions";
@@ -7,8 +8,22 @@
 
 <h1>@ViewData["Title"]</h1>
 
+<!-- Display TempData messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
 <p>
-    <a asp-page="./Create" class="btn btn-success">Create New Prescription</a>
+    <a asp-page="./Create" class="btn btn-primary">Create New Prescription</a>
 </p>
 
 <form method="get" class="mb-3">
@@ -22,7 +37,7 @@
     </div>
 </form>
 
-@if (!Model.PrescriptionList.Any())
+@if (Model.PrescriptionList == null || !Model.PrescriptionList.Any())
 {
     <div class="alert alert-info">No prescriptions found.</div>
 }
@@ -51,7 +66,7 @@ else
         </thead>
         <tbody>
     @foreach (var item in Model.PrescriptionList) {
-            <tr>
+            <tr class="@(item.Status == PrescriptionStatus.Cancelled ? "table-secondary text-muted" : "")">
                 <td>
                     @Html.DisplayFor(modelItem => item.Patient.Name)
                 </td>
@@ -65,10 +80,19 @@ else
                     @Html.DisplayFor(modelItem => item.ExpiryDate)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Status)
+                    <span class="badge @(item.Status == PrescriptionStatus.Active ? "bg-success" : item.Status == PrescriptionStatus.Cancelled ? "bg-danger" : "bg-secondary")">
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </span>
                 </td>
                 <td>
                     <a asp-page="./Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Details</a> 
+                    
+                    @if (item.Status == PrescriptionStatus.Active)
+                    { 
+                        <form method="post" asp-page-handler="Cancel" asp-route-id="@item.Id" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this prescription?');">
+                            <button type="submit" class="btn btn-sm btn-warning">Cancel</button>
+                        </form>
+                    }
                     @* Edit/Delete might be added later based on status or permissions *
                     @* <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> | *
                     @* <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a> *@
@@ -77,12 +101,4 @@ else
     }
         </tbody>
     </table>
-}
-
-@* Display TempData Success Message if present (from Create page) *@
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success mt-3" role="alert">
-        @TempData["SuccessMessage"]
-    </div>
 } 

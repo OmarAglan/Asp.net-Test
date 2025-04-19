@@ -63,5 +63,35 @@ public class PrescriptionRepository : IPrescriptionRepository
         return prescription;
     }
 
+    public async Task<bool> CancelAsync(int prescriptionId)
+    {
+        var prescription = await _context.Prescriptions.FindAsync(prescriptionId);
+        if (prescription == null)
+        {
+            return false; // Not found
+        }
+
+        // Check if already cancelled?
+        if (prescription.Status == PrescriptionStatus.Cancelled)
+        {
+            return true; // Already cancelled, consider success
+        }
+
+        prescription.Status = PrescriptionStatus.Cancelled;
+        prescription.UpdatedAt = DateTime.UtcNow; // Explicitly update audit field
+        _context.Entry(prescription).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (DbUpdateException) // Catch potential DB errors
+        {
+            // TODO: Log exception
+            return false;
+        }
+    }
+
     // Implement Update/Delete later if needed
 } 

@@ -84,5 +84,14 @@ public class PrescriptionService : IPrescriptionService
         return await _prescriptionRepository.GetByIdAsync(id); // Use renamed method
     }
 
+    public async Task<bool> CancelPrescriptionAsync(int prescriptionId)
+    {
+        // Could add business logic here, e.g., check user permissions,
+        // or prevent cancellation based on status or time.
+        // For now, directly call the repository.
+        _logger.LogInformation("Attempting to cancel prescription ID {PrescriptionId}", prescriptionId);
+        return await _prescriptionRepository.CancelAsync(prescriptionId);
+    }
+
     // Add Update/Delete service methods later if needed
 } 

@@ -8,6 +8,7 @@ using Roshta.ViewModels;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace Roshta.Pages.Prescriptions
 {
@@ -40,14 +41,51 @@ namespace Roshta.Pages.Prescriptions
         public SelectList? PatientSelectList { get; set; }
         public SelectList? MedicationSelectList { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(int? copyFromId)
         {
-            // Populate SelectLists for dropdowns
+            // Populate SelectLists for dropdowns (always needed)
             var patients = await _patientRepository.GetAllAsync();
             PatientSelectList = new SelectList(patients.OrderBy(p => p.Name), nameof(Patient.Id), nameof(Patient.Name));
 
             var medications = await _medicationRepository.GetAllAsync();
             MedicationSelectList = new SelectList(medications.OrderBy(m => m.Name), nameof(Medication.Id), nameof(Medication.Name));
+
+            // If copying from an existing prescription
+            if (copyFromId.HasValue)
+            {
+                _logger.LogInformation("Attempting to copy prescription ID {CopyFromId}", copyFromId.Value);
+                // Fetch the original prescription - GetByIdAsync should include items
+                var originalPrescription = await _prescriptionService.GetPrescriptionByIdAsync(copyFromId.Value);
+
+                if (originalPrescription != null)
+                {
+                    // Pre-populate the ViewModel
+                    PrescriptionCreate.PatientId = originalPrescription.PatientId;
+                    // ExpiryDate and NextAppointmentDate could be copied or left blank - let's copy for now
+                    PrescriptionCreate.ExpiryDate = originalPrescription.ExpiryDate;
+                    PrescriptionCreate.NextAppointmentDate = originalPrescription.NextAppointmentDate;
+                    
+                    // Map the original items to the ViewModel items
+                    PrescriptionCreate.Items = originalPrescription.PrescriptionItems.Select(item => new PrescriptionCreateModel.PrescriptionItemCreateModel
+                    {
+                        MedicationId = item.MedicationId,
+                        Dosage = item.Dosage,
+                        Frequency = item.Frequency,
+                        Duration = item.Duration,
+                        Quantity = item.Quantity,
+                        Instructions = item.Instructions,
+                        Refills = item.Refills,
+                        Notes = item.Notes
+                    }).ToList();
+                    _logger.LogInformation("Successfully pre-populated form from prescription ID {CopyFromId}", copyFromId.Value);
+                }
+                else
+                {
+                     _logger.LogWarning("Could not find prescription ID {CopyFromId} to copy.", copyFromId.Value);
+                     // Optional: Add a TempData message if needed
+                     // TempData["ErrorMessage"] = "Could not find the prescription to copy.";
+                }
+            }
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -62,20 +100,17 @@ namespace Roshta.Pages.Prescriptions
             if (PrescriptionCreate.Items != null)
             {
                 // Ensure we have the select list available for looking up names
-                if (MedicationSelectList == null) { await OnGetAsync(); }
+                if (MedicationSelectList == null) { await OnGetAsync(null); } // Pass null to avoid re-copying if validation fails
                 
                 for(int i = 0; i < PrescriptionCreate.Items.Count; i++)
                 {
                     var item = PrescriptionCreate.Items[i];
                     if (!await _medicationRepository.ExistsAsync(item.MedicationId))
                     {
-                        // Try to find the text corresponding to the invalid ID from the select list
                         var medName = MedicationSelectList?.FirstOrDefault(m => m.Value == item.MedicationId.ToString())?.Text;
                         var errorMsg = medName != null 
                             ? $"Selected medication '{medName}' no longer exists or is invalid."
-                            : $"Selected medication (ID: {item.MedicationId}) does not exist."; // Fallback if name not found
-                        
-                        // Add error specific to the item in the list
+                            : $"Selected medication (ID: {item.MedicationId}) does not exist.";
                         ModelState.AddModelError($"PrescriptionCreate.Items[{i}].MedicationId", errorMsg); 
                     }
                 }
@@ -85,7 +120,7 @@ namespace Roshta.Pages.Prescriptions
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning("Model validation failed during prescription creation.");
-                await OnGetAsync(); // Re-populate lists
+                await OnGetAsync(null); // Re-populate lists, pass null to copyFromId
                 return Page();
             }
 
@@ -93,30 +128,34 @@ namespace Roshta.Pages.Prescriptions
             int? currentDoctorId = _licenseService.GetCurrentDoctorId();
             if (currentDoctorId == null)
             {
-                // This shouldn't happen if the ActivationCheckFilter is working correctly,
-                // but handle it defensively.
                 _logger.LogError("Could not retrieve Doctor ID for prescription creation. Profile might not be set up.");
                 ModelState.AddModelError(string.Empty, "Cannot create prescription. Doctor profile not found.");
-                await OnGetAsync(); // Re-populate lists
+                await OnGetAsync(null); // Re-populate lists
                 return Page();
             }
             // ---------------------------------------------------
 
-            var createdPrescription = await _prescriptionService.CreatePrescriptionAsync(PrescriptionCreate, currentDoctorId.Value);
-
-            if (createdPrescription == null)
+            try
             {
-                // Add a general error message if creation failed in the service
-                // (The service should ideally log specific errors)
-                ModelState.AddModelError(string.Empty, "Unable to create prescription. Please check inputs or contact support.");
-                await OnGetAsync(); // Re-populate lists
+                var createdPrescription = await _prescriptionService.CreatePrescriptionAsync(PrescriptionCreate, currentDoctorId.Value);
+                _logger.LogInformation("Prescription created successfully with ID {PrescriptionId}", createdPrescription.Id);
+                TempData["SuccessMessage"] = "Prescription created successfully!";
+                return RedirectToPage("./Index");
+            }
+            catch (ArgumentException argEx)
+            {
+                _logger.LogWarning(argEx, "Invalid argument during prescription creation for Patient ID {PatientId}", PrescriptionCreate.PatientId);
+                ModelState.AddModelError(string.Empty, argEx.Message);
+                await OnGetAsync(null); // Re-populate lists
                 return Page();
             }
-
-            // Redirect to a details page (or index for now) upon successful creation
-            // TODO: Create a Details page later and redirect there: return RedirectToPage("./Details", new { id = createdPrescription.Id });
-            TempData["SuccessMessage"] = "Prescription created successfully!"; // Add success message
-            return RedirectToPage("./Index"); // Redirect to prescription list now
+            catch (Exception ex) 
+            {
+                _logger.LogError(ex, "Error creating prescription for Patient ID {PatientId}", PrescriptionCreate.PatientId);
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred while creating the prescription. Please try again or contact support.");
+                await OnGetAsync(null); // Re-populate lists
+                return Page();
+            }
         }
 
         // AJAX Handler to check if a medication ID exists

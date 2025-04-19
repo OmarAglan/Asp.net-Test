@@ -21,6 +21,11 @@ To provide a system for doctors to issue and manage prescriptions, patients to v
 *   **Doctor Profile Management:** 
     *   Initial profile setup (`/DoctorProfile/Setup`) enforced after activation.
     *   Profile editing (`/DoctorProfile/Edit`) available after setup.
+*   **Prescription Management:**
+    *   Creation with dynamic medication items.
+    *   List and Detail views.
+    *   Cancellation (status change) of active prescriptions.
+    *   Copying existing prescriptions to a new draft.
 *   **CRUD Operations:**
     *   Medications
     *   Patients

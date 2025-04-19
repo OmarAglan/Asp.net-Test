@@ -12,4 +12,5 @@ public interface IPrescriptionService
     Task<IEnumerable<Prescription>> GetAllPrescriptionsAsync();
     Task<IEnumerable<Prescription>> SearchPrescriptionsAsync(string searchTerm);
     Task<Prescription?> GetPrescriptionByIdAsync(int id);
+    Task<bool> CancelPrescriptionAsync(int prescriptionId);
 } 

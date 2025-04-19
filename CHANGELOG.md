@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.9.7.1] - YYYY-MM-DD
+
+### Added
+
+*   Implemented "Cancel Prescription" feature (updates status via button on Index page).
+*   Implemented "Copy Prescription" feature (button on Details page links to pre-populated Create page).
+
+### Changed
+
+*   Added `CancelAsync`/`CancelPrescriptionAsync` methods to `IPrescriptionRepository`/`PrescriptionRepository` and `IPrescriptionService`/`PrescriptionService`.
+*   Updated `Pages/Prescriptions/Create.cshtml.cs` (`OnGetAsync`) to handle `copyFromId` parameter.
+*   Updated `Pages/Prescriptions/Create.cshtml` view and JavaScript to render and manage pre-populated items.
+*   Updated `Pages/Prescriptions/Index.cshtml` to include Cancel button/form for active prescriptions and improve status display.
+*   Updated `Pages/Prescriptions/Details.cshtml` to include Copy button.
+*   Updated `README.md`.
+
+### Fixed
+
+*   Fixed Razor syntax errors (missing braces, unclosed div) in `Pages/Prescriptions/Details.cshtml`.
+
 ## [0.9.7] - YYYY-MM-DD
 
 ### Added

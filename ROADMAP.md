@@ -67,7 +67,11 @@ This document outlines the planned development phases and features for the Rosht
     *   Implement live search/autocomplete with debouncing for list pages (Patients, Medications, Prescriptions).
         *   Client-side JavaScript (e.g., using `fetch` and debouncing).
         *   Server-side endpoint (e.g., named page handler or API controller returning JSON).
-5.  **Desktop Application Experience (.NET MAUI Blazor Hybrid - Optional Future Step):**
+5.  **Prescription Management Refinements:** (Completed)
+    *   Implement "Cancel Prescription" functionality (updates `Prescription.Status` to `Cancelled`). (Completed)
+    *   Avoid direct editing or physical deletion of issued prescriptions. (Policy Adopted)
+    *   (Optional Later) Add "Copy Prescription" feature to facilitate re-prescribing. (Completed)
+6.  **Desktop Application Experience (.NET MAUI Blazor Hybrid - Optional Future Step):**
     *   **Goal:** Package the application as an installable desktop app (.exe, .dmg, etc.) for a native feel.
     *   **Approach:** Utilize .NET MAUI Blazor Hybrid to host the existing web UI (Razor components) within a native app shell.
     *   **Key Steps:**
@@ -78,15 +82,15 @@ This document outlines the planned development phases and features for the Rosht
         *   **Configure Hosting:** Configure the MAUI Blazor project's `MauiProgram.cs` to register dependencies (like DbContext, Repositories) and set up the BlazorWebView to host the root component(s) from the shared UI library.
         *   **Platform Adjustments:** Address any platform-specific styling or behavior differences if necessary.
         *   **Build & Package:** Build the MAUI project to produce native desktop installers.
-6.  **Subscription Management (Admin/Payment):**
+7.  **Subscription Management (Admin/Payment):**
     *   (Future) Implement mechanism to manage `Doctor.IsSubscribed` flag (e.g., admin panel, payment gateway integration).
-7.  **Reporting (Optional):**
+8.  **Reporting (Optional):**
     *   Generate basic reports.
-8.  **API Endpoints (Optional):**
+9.  **API Endpoints (Optional):**
     *   Create APIs for external integration.
-9.  **Testing:**
+10. **Testing:**
     *   Implement unit and integration tests.
-10. **Deployment:**
+11. **Deployment:**
     *   Prepare for deployment (Web App or MAUI App).
 
 ## Phase 5: Optimization & Refinement
