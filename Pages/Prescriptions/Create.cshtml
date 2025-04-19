@@ -345,39 +345,41 @@
                  }
             });
 
-            // Client-side Date Validation
+            // Client-side Date Validation (using shared helper)
             const expiryDateInput = document.getElementById('PrescriptionCreate_ExpiryDate');
             const nextAppointmentDateInput = document.getElementById('PrescriptionCreate_NextAppointmentDate');
             const expiryDateValidationSpan = document.querySelector('span[data-valmsg-for="PrescriptionCreate.ExpiryDate"]');
             const nextAppointmentDateValidationSpan = document.querySelector('span[data-valmsg-for="PrescriptionCreate.NextAppointmentDate"]');
 
-            function validateDateIsFuture(inputElement, validationSpan) {
-                if (!inputElement || !validationSpan) return;
-                const dateValue = inputElement.value;
-                validationSpan.textContent = '';
-                if (dateValue) {
-                    try {
-                        const today = new Date();
-                        today.setUTCHours(0, 0, 0, 0);
-                        const parts = dateValue.split('-');
-                        const inputDate = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
-                        if (inputDate <= today) {
-                            validationSpan.textContent = (inputElement.labels[0]?.textContent || 'Date') + ' must be in the future.';
-                        }
-                    } catch (e) {
-                        console.error("Error parsing date:", e);
-                        validationSpan.textContent = 'Invalid date format.';
-                    }
-                }
-            }
+            // Define handler for cross-field date validation
+            const expiryVsAppointmentHandler = () => {
+                validateDateBAfterDateA(
+                    nextAppointmentDateInput, 
+                    expiryDateInput, 
+                    nextAppointmentDateValidationSpan, 
+                    expiryDateValidationSpan, 
+                    'Next Appointment Date', 
+                    'Expiry Date'
+                );
+            };
 
             if (expiryDateInput) {
-                expiryDateInput.addEventListener('change', () => validateDateIsFuture(expiryDateInput, expiryDateValidationSpan));
-                expiryDateInput.addEventListener('blur', () => validateDateIsFuture(expiryDateInput, expiryDateValidationSpan));
+                const prefix = expiryDateInput.labels[0]?.textContent || 'Expiry Date';
+                const handler = () => {
+                     validateDateIsFuture(expiryDateInput, expiryDateValidationSpan, prefix);
+                     expiryVsAppointmentHandler(); // Also check cross-field rule
+                };
+                expiryDateInput.addEventListener('change', handler);
+                expiryDateInput.addEventListener('blur', handler);
             }
             if (nextAppointmentDateInput) {
-                nextAppointmentDateInput.addEventListener('change', () => validateDateIsFuture(nextAppointmentDateInput, nextAppointmentDateValidationSpan));
-                nextAppointmentDateInput.addEventListener('blur', () => validateDateIsFuture(nextAppointmentDateInput, nextAppointmentDateValidationSpan));
+                const prefix = nextAppointmentDateInput.labels[0]?.textContent || 'Next Appointment Date';
+                 const handler = () => {
+                     validateDateIsFuture(nextAppointmentDateInput, nextAppointmentDateValidationSpan, prefix);
+                     expiryVsAppointmentHandler(); // Also check cross-field rule
+                 };
+                nextAppointmentDateInput.addEventListener('change', handler);
+                nextAppointmentDateInput.addEventListener('blur', handler);
             }
 
             // Initial state check

@@ -16,7 +16,7 @@
             <div class="form-group">
                 <span class="text-danger">*</span>
                 <label asp-for="Patient.Name" class="control-label"></label>
-                <input asp-for="Patient.Name" class="form-control" />
+                <input asp-for="Patient.Name" class="form-control" id="Patient_Name"/>
                 <span asp-validation-for="Patient.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -26,7 +26,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Patient.ContactInfo" class="control-label"></label>
-                <input asp-for="Patient.ContactInfo" class="form-control" />
+                <input asp-for="Patient.ContactInfo" class="form-control" id="Patient_ContactInfo"/>
                 <span asp-validation-for="Patient.ContactInfo" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -72,4 +72,75 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/validation-helpers.js"></script>
+    <script>
+        // Using shared validation helpers
+        document.addEventListener('DOMContentLoaded', function () {
+            const dobInput = document.getElementById('Patient_DateOfBirth');
+            const lastVisitInput = document.getElementById('Patient_LastVisitDate');
+            const dobValidationSpan = document.querySelector('span[data-valmsg-for="Patient.DateOfBirth"]');
+            const lastVisitValidationSpan = document.querySelector('span[data-valmsg-for="Patient.LastVisitDate"]');
+
+            // Removed local validateDob and validateLastVisit functions
+
+            if (dobInput) {
+                const prefix = dobInput.labels[0]?.textContent || 'Date of Birth'; // Get label text
+                dobInput.addEventListener('change', () => validateDateIsPast(dobInput, dobValidationSpan, prefix));
+                dobInput.addEventListener('blur', () => validateDateIsPast(dobInput, dobValidationSpan, prefix));
+            }
+            if (lastVisitInput) {
+                const prefix = lastVisitInput.labels[0]?.textContent || 'Last Visit Date';
+                // Last Visit Date uses validateDateIsPast but checks if date > today
+                // Let's create a specific helper or adjust validateDateIsPast if needed.
+                // For now, using a lambda to adapt logic slightly: check it's NOT future
+                const validateLastVisitNotFuture = (input, span, msgPrefix) => {
+                    if (!input || !span) return;
+                    const dateValue = input.value;
+                    span.textContent = '';
+                    input.classList.remove('is-invalid');
+                    if (dateValue) {
+                        try {
+                            const today = new Date();
+                            today.setUTCHours(0, 0, 0, 0);
+                            const parts = dateValue.split('-');
+                            const inputDate = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+                            if (inputDate > today) { // Check if it IS in the future
+                                span.textContent = msgPrefix + ' cannot be in the future.';
+                                input.classList.add('is-invalid');
+                            }
+                        } catch (e) {
+                             span.textContent = 'Invalid date format.';
+                             input.classList.add('is-invalid');
+                        }
+                    }
+                };
+                lastVisitInput.addEventListener('change', () => validateLastVisitNotFuture(lastVisitInput, lastVisitValidationSpan, prefix));
+                lastVisitInput.addEventListener('blur', () => validateLastVisitNotFuture(lastVisitInput, lastVisitValidationSpan, prefix));
+            }
+
+            // Get input elements and validation spans
+            const nameInput = document.getElementById('Patient_Name');
+            const contactInput = document.getElementById('Patient_ContactInfo');
+            const nameValidationSpan = document.querySelector('span[data-valmsg-for="Patient.Name"]');
+            const contactValidationSpan = document.querySelector('span[data-valmsg-for="Patient.ContactInfo"]');
+
+            // Validation handlers
+            const nameRequiredHandler = () => validateRequiredField(nameInput, nameValidationSpan, 'Name');
+            const contactRequiredHandler = () => validateRequiredField(contactInput, contactValidationSpan, 'Contact Info');
+
+            // Add listeners
+            if (nameInput) {
+                nameInput.addEventListener('blur', nameRequiredHandler);
+                nameInput.addEventListener('input', debounce(nameRequiredHandler, 500));
+            }
+            if (contactInput) {
+                contactInput.addEventListener('blur', contactRequiredHandler);
+                contactInput.addEventListener('input', debounce(contactRequiredHandler, 500));
+            }
+
+            // Initial checks on load
+            nameRequiredHandler();
+            contactRequiredHandler();
+        });
+    </script>
 }

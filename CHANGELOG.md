@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.9.7.5] - YYYY-MM-DD
+
+### Added
+
+*   Added client-side, debounced input validation for the `Name` and `ContactInfo` fields on the Patient Create (`Pages/Patients/Create.cshtml`) and Patient Edit (`Pages/Patients/Edit.cshtml`) pages to ensure they are not empty.
+
+### Changed
+
+*   Updated `Pages/Patients/Create.cshtml` and `Pages/Patients/Edit.cshtml` to include `id` attributes on relevant inputs and integrate JavaScript validation using `wwwroot/js/validation-helpers.js`.
+
 ## [0.9.7.1] - YYYY-MM-DD
 
 ### Added

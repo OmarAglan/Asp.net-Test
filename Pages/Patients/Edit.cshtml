@@ -17,7 +17,7 @@
             <div class="form-group">
                 <span class="text-danger">*</span>
                 <label asp-for="Patient.Name" class="control-label"></label>
-                <input asp-for="Patient.Name" class="form-control" />
+                <input asp-for="Patient.Name" class="form-control" id="Patient_Name" />
                 <span asp-validation-for="Patient.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -29,7 +29,7 @@
             <div class="form-group">
                 
                 <label asp-for="Patient.ContactInfo" class="control-label"></label>
-                <input asp-for="Patient.ContactInfo" class="form-control" />
+                <input asp-for="Patient.ContactInfo" class="form-control" id="Patient_ContactInfo" />
                 <span asp-validation-for="Patient.ContactInfo" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -81,4 +81,47 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/validation-helpers.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dobInput = document.getElementById('Patient_DateOfBirth');
+            const dobValidationSpan = document.querySelector('span[data-valmsg-for="Patient.DateOfBirth"]');
+            const lastVisitInput = document.getElementById('Patient_LastVisitDate');
+            const lastVisitValidationSpan = document.querySelector('span[data-valmsg-for="Patient.LastVisitDate"]');
+
+            if (dobInput) {
+                dobInput.addEventListener('blur', () => validateDateNotFuture(dobInput, dobValidationSpan, 'Date of Birth'));
+                validateDateNotFuture(dobInput, dobValidationSpan, 'Date of Birth'); // Initial check
+            }
+            if (lastVisitInput) {
+                lastVisitInput.addEventListener('blur', () => validateLastVisitNotFuture(lastVisitInput, lastVisitValidationSpan, 'Last Visit Date'));
+                validateLastVisitNotFuture(lastVisitInput, lastVisitValidationSpan, 'Last Visit Date'); // Initial check
+            }
+
+            // Get input elements and validation spans for Name and ContactInfo
+            const nameInput = document.getElementById('Patient_Name');
+            const contactInput = document.getElementById('Patient_ContactInfo');
+            const nameValidationSpan = document.querySelector('span[data-valmsg-for="Patient.Name"]');
+            const contactValidationSpan = document.querySelector('span[data-valmsg-for="Patient.ContactInfo"]');
+
+            // Validation handlers
+            const nameRequiredHandler = () => validateRequiredField(nameInput, nameValidationSpan, 'Name');
+            const contactRequiredHandler = () => validateRequiredField(contactInput, contactValidationSpan, 'Contact Info');
+
+            // Add listeners
+            if (nameInput) {
+                nameInput.addEventListener('blur', nameRequiredHandler);
+                nameInput.addEventListener('input', debounce(nameRequiredHandler, 500));
+            }
+            if (contactInput) {
+                contactInput.addEventListener('blur', contactRequiredHandler);
+                contactInput.addEventListener('input', debounce(contactRequiredHandler, 500));
+            }
+
+            // Initial checks on load
+            nameRequiredHandler();
+            contactRequiredHandler();
+        });
+    </script>
 }
+

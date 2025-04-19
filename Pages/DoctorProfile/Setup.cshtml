@@ -59,4 +59,55 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Using shared validation helpers
+        document.addEventListener('DOMContentLoaded', function () {
+            const phoneInput = document.getElementById('DoctorProfile_ContactPhone');
+            const emailInput = document.getElementById('DoctorProfile_ContactEmail');
+            const phoneValidationSpan = document.querySelector('span[data-valmsg-for="DoctorProfile.ContactPhone"]');
+            const emailValidationSpan = document.querySelector('span[data-valmsg-for="DoctorProfile.ContactEmail"]');
+            const licenseInput = document.getElementById('DoctorProfile_LicenseNumber');
+            const licenseValidationSpan = document.querySelector('span[data-valmsg-for="DoctorProfile.LicenseNumber"]');
+            const nameInput = document.getElementById('DoctorProfile_Name');
+            const nameValidationSpan = document.querySelector('span[data-valmsg-for="DoctorProfile.Name"]');
+            
+            // Apply Input Masking for Phone Number
+            if (phoneInput) {
+                const phoneMask = IMask(phoneInput, {
+                    mask: '+{20}1000000000', // Fixed country code + 9 digits
+                    lazy: false // Show mask immediately
+                });
+            }
+
+            // Define the handler that calls the shared function for required contact
+            const contactRequiredHandler = () => validateContactMethodRequired(phoneInput, emailInput, phoneValidationSpan, emailValidationSpan);
+            // Define the handler that calls the shared function for phone format
+            const phoneFormatHandler = () => validatePhoneNumberFormat(phoneInput, phoneValidationSpan);
+            const licenseRequiredHandler = () => validateRequiredField(licenseInput, licenseValidationSpan, 'License Number');
+            const nameRequiredHandler = () => validateRequiredField(nameInput, nameValidationSpan, 'Name');
+
+            // Add listeners to both fields
+            if (phoneInput) {
+                phoneInput.addEventListener('blur', contactRequiredHandler);
+                phoneInput.addEventListener('blur', phoneFormatHandler); // Also check format on blur
+            }
+            if (emailInput) {
+                emailInput.addEventListener('blur', contactRequiredHandler);
+            }
+            if (licenseInput) {
+                licenseInput.addEventListener('blur', licenseRequiredHandler);
+                licenseInput.addEventListener('input', debounce(licenseRequiredHandler, 500));
+            }
+            if (nameInput) {
+                nameInput.addEventListener('blur', nameRequiredHandler);
+                nameInput.addEventListener('input', debounce(nameRequiredHandler, 500));
+            }
+            
+            // Initial checks on load
+            contactRequiredHandler(); 
+            phoneFormatHandler(); 
+            licenseRequiredHandler();
+            nameRequiredHandler();
+        });
+    </script>
 } 
