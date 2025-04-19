@@ -56,8 +56,11 @@ This document outlines the planned development phases and features for the Rosht
     *   Create page(s) for the licensed doctor to view/edit their own details. (Completed - via `/DoctorProfile/Edit`)
 2.  **Search & Filtering:** (Basic Implementation - Completed)
     *   Implement search/filtering for Patients, Medications, Prescriptions. (Completed basic text search)
-3.  **Validation:**
+3.  **Validation:** (In Progress)
     *   Add robust server-side and client-side validation.
+        *   Implement server-side checks for foreign key validity (e.g., ensure selected PatientId, MedicationId exist before saving). (Completed)
+        *   Implement complex business rule validation (e.g., using `IValidatableObject` or custom `ValidationAttribute` for date comparisons, conditional requirements). (Completed)
+        *   Enhance client-side validation using JavaScript for immediate feedback (potentially deferred to UX phase).
 4.  **User Experience:**
     *   Improve UI/UX.
     *   Add user feedback.

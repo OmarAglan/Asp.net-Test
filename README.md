@@ -26,6 +26,8 @@ To provide a system for doctors to issue and manage prescriptions, patients to v
     *   Patients
     *   Prescriptions (linking Patients and Medications, associated with the current Doctor)
 *   **Data Validation:** Uses Data Annotations and Model Validation.
+    *   Added custom validation for foreign keys (e.g., Patient/Medication selection in Prescription Create).
+    *   Added custom validation for business rules (e.g., Date checks in Patient, required contact in Doctor Profile).
 *   **Service & Repository Pattern:** Business logic is separated using services and data access using repositories.
 *   **Basic Search:** Implemented simple text search on list pages for Patients (Name, ContactInfo), Medications (Name), and Prescriptions (Patient Name).
 

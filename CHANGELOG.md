@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.9.7] - YYYY-MM-DD
+
+### Added
+
+*   Implemented custom server-side validation using `IValidatableObject`:
+    *   `PrescriptionCreateModel`: Validate `ExpiryDate` and `NextAppointmentDate` are in the future; ensure at least one item exists.
+    *   `Patient`: Validate `DateOfBirth` is in the past; `LastVisitDate` is not in the future.
+    *   `SetupModel` & `EditModel` (Doctor Profile): Ensure at least one contact method (Phone or Email) is provided.
+*   Implemented client-side AJAX check on `Pages/Prescriptions/Create.cshtml` to verify `MedicationId` existence before adding item to the list.
+*   Added server-side AJAX handler `OnGetCheckMedicationExistsAsync` to `Pages/Prescriptions/Create.cshtml.cs`.
+
+### Changed
+
+*   Improved server-side `MedicationId` validation error message in `Pages/Prescriptions/Create.cshtml.cs` to show medication name if possible.
+*   Updated `README.md` and `ROADMAP.md`.
+
 ## [0.9.6] - YYYY-MM-DD
 
 ### Added

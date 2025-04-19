@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Roshta.Models;
 using Roshta.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 
 namespace Roshta.Pages.DoctorProfile;
 
-public class SetupModel : PageModel
+public class SetupModel : PageModel, IValidatableObject
 {
     private readonly IDoctorService _doctorService;
     private readonly ILicenseService _licenseService;
@@ -123,6 +126,18 @@ public class SetupModel : PageModel
             _logger.LogError(ex, "Error saving doctor profile.");
             ModelState.AddModelError(string.Empty, "An error occurred while saving the profile. Please try again.");
             return Page();
+        }
+    }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        // Rule: Require at least one contact method
+        if (string.IsNullOrWhiteSpace(DoctorProfile.ContactPhone) && string.IsNullOrWhiteSpace(DoctorProfile.ContactEmail))
+        {
+            yield return new ValidationResult(
+                "Please provide at least one contact method (Phone or Email).",
+                new[] { nameof(DoctorProfile.ContactPhone), nameof(DoctorProfile.ContactEmail) }); 
+                // Associate error with both fields
         }
     }
 } 

@@ -5,10 +5,13 @@ using Roshta.Models; // Assuming Doctor model is here
 using Roshta.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 
 namespace Roshta.Pages.DoctorProfile;
 
-public class EditModel : PageModel
+public class EditModel : PageModel, IValidatableObject
 {
     private readonly IDoctorService _doctorService;
     private readonly ILicenseService _licenseService;
@@ -112,24 +115,20 @@ public class EditModel : PageModel
         try
         {
             // Map the Input Model back to a Doctor object or specific update model/DTO
-            // We assume an UpdateDoctorProfileAsync method exists or will be created.
-            // This method should ideally fetch the existing entity and update only the necessary fields.
-            // Passing the whole Input Model might be okay if the service layer handles mapping correctly.
-            
-            // Placeholder: Assuming UpdateDoctorProfileAsync takes ID and the input model
-            // You might need to adjust this based on your actual service implementation
             bool success = await _doctorService.UpdateDoctorProfileAsync(currentDoctorId.Value, DoctorProfile);
 
             if(success)
             {
                 _logger.LogInformation("Doctor profile updated successfully for Doctor ID: {DoctorId}", currentDoctorId.Value);
                 TempData["SuccessMessage"] = "Profile updated successfully!";
-                return RedirectToPage(); // Redirect back to the Edit page (PRG pattern)
+                // It's good practice to redirect after POST to prevent re-submission
+                // Redirect back to the same page to show the success message and updated data
+                return RedirectToPage(); 
             }
             else
             {
                  _logger.LogWarning("UpdateDoctorProfileAsync returned false for Doctor ID: {DoctorId}", currentDoctorId.Value);
-                 ModelState.AddModelError(string.Empty, "Could not update the profile. Please check the values and try again.");
+                 ModelState.AddModelError(string.Empty, "Could not update the profile. The data might be invalid or unchanged.");
                  return Page();
             }
         }
@@ -138,6 +137,18 @@ public class EditModel : PageModel
             _logger.LogError(ex, "Error updating doctor profile for Doctor ID: {DoctorId}", currentDoctorId.Value);
             ModelState.AddModelError(string.Empty, "An error occurred while saving the profile. Please try again.");
             return Page();
+        }
+    }
+
+    // IValidatableObject implementation for EditModel
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        // Rule: Require at least one contact method
+        if (string.IsNullOrWhiteSpace(DoctorProfile.ContactPhone) && string.IsNullOrWhiteSpace(DoctorProfile.ContactEmail))
+        {
+            yield return new ValidationResult(
+                "Please provide at least one contact method (Phone or Email).",
+                new[] { nameof(DoctorProfile.ContactPhone), nameof(DoctorProfile.ContactEmail) });
         }
     }
 } 

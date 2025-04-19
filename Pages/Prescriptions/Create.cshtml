@@ -134,7 +134,8 @@
                 noItemsMessage.style.display = itemsTableBody.rows.length === 0 ? 'block' : 'none';
             }
 
-            btnAddItem.addEventListener('click', function () {
+            // Make the event listener async to use await for fetch
+            btnAddItem.addEventListener('click', async function () { 
                 // 1. Get values from the input fields
                 const medicationSelect = document.getElementById('selectMedication');
                 const medicationId = medicationSelect.value;
@@ -147,11 +148,33 @@
                 const refills = document.getElementById('inputRefills').value || null;
                 const notes = document.getElementById('inputNotes').value || null;
 
-                // 2. Basic Validation 
+                // 2. Basic Client-Side Validation 
                 if (!medicationId || !quantity || !instructions) {
                     alert('Please select a medication and enter quantity and instructions.');
                     return;
                 }
+                
+                // *** NEW: Check if medication exists via AJAX ***
+                try {
+                    const response = await fetch(`?handler=CheckMedicationExists&id=${medicationId}`);
+                    if (!response.ok) {
+                         throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+
+                    if (!data.exists) {
+                        alert(`Sorry, the selected medication '${medicationName}' is no longer available or invalid. Please choose another.`);
+                        // Optionally, remove the invalid item from the dropdown here
+                        // medicationSelect.querySelector(`option[value="${medicationId}"]`).remove();
+                        medicationSelect.value = ''; // Reset selection
+                        return; // Stop processing this item
+                    }
+                } catch (error) {
+                    console.error('Error checking medication existence:', error);
+                    alert('An error occurred while verifying the medication. Please try again.');
+                    return; // Stop processing on error
+                }
+                // *** END NEW ***
 
                 // 3. Create table row to display the item
                 const newRow = itemsTableBody.insertRow();

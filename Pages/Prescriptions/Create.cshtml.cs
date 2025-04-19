@@ -52,10 +52,40 @@ namespace Roshta.Pages.Prescriptions
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // --- Pre-check selected Patient ID --- 
+            if (!await _patientRepository.ExistsAsync(PrescriptionCreate.PatientId))
+            {
+                ModelState.AddModelError("PrescriptionCreate.PatientId", "Selected patient does not exist.");
+            }
+
+            // --- Pre-check selected Medication IDs --- 
+            if (PrescriptionCreate.Items != null)
+            {
+                // Ensure we have the select list available for looking up names
+                if (MedicationSelectList == null) { await OnGetAsync(); }
+                
+                for(int i = 0; i < PrescriptionCreate.Items.Count; i++)
+                {
+                    var item = PrescriptionCreate.Items[i];
+                    if (!await _medicationRepository.ExistsAsync(item.MedicationId))
+                    {
+                        // Try to find the text corresponding to the invalid ID from the select list
+                        var medName = MedicationSelectList?.FirstOrDefault(m => m.Value == item.MedicationId.ToString())?.Text;
+                        var errorMsg = medName != null 
+                            ? $"Selected medication '{medName}' no longer exists or is invalid."
+                            : $"Selected medication (ID: {item.MedicationId}) does not exist."; // Fallback if name not found
+                        
+                        // Add error specific to the item in the list
+                        ModelState.AddModelError($"PrescriptionCreate.Items[{i}].MedicationId", errorMsg); 
+                    }
+                }
+            }
+            
+            // --- Check Model State AFTER custom checks --- 
             if (!ModelState.IsValid)
             {
-                // Re-populate SelectLists if returning to the page due to errors
-                await OnGetAsync(); // Re-run OnGet to repopulate lists
+                _logger.LogWarning("Model validation failed during prescription creation.");
+                await OnGetAsync(); // Re-populate lists
                 return Page();
             }
 
@@ -87,6 +117,13 @@ namespace Roshta.Pages.Prescriptions
             // TODO: Create a Details page later and redirect there: return RedirectToPage("./Details", new { id = createdPrescription.Id });
             TempData["SuccessMessage"] = "Prescription created successfully!"; // Add success message
             return RedirectToPage("./Index"); // Redirect to prescription list now
+        }
+
+        // AJAX Handler to check if a medication ID exists
+        public async Task<IActionResult> OnGetCheckMedicationExistsAsync(int id)
+        {
+            bool exists = await _medicationRepository.ExistsAsync(id);
+            return new JsonResult(new { exists });
         }
     }
 } 
