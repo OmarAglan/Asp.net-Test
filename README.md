@@ -15,7 +15,7 @@ To provide a system for doctors to issue and manage prescriptions, patients to v
 *   **Authentication:** ASP.NET Core Identity (Planned)
 *   **Core Models:** Includes Patients, Doctors, Prescriptions, Medications with relationships, audit fields (`CreatedAt`, `UpdatedAt`), status tracking (e.g., `PrescriptionStatus` enum), and specific fields for visits, payments, etc.
 
-## Features (v0.9.5)
+## Features (v0.9.7.5)
 
 *   **Activation & Licensing:** Application requires activation via a license key (simple string check). Access is controlled by an `ActivationCheckPageFilter`.
 *   **Doctor Profile Management:** 
@@ -33,6 +33,7 @@ To provide a system for doctors to issue and manage prescriptions, patients to v
 *   **Data Validation:** Uses Data Annotations and Model Validation.
     *   Added custom validation for foreign keys (e.g., Patient/Medication selection in Prescription Create).
     *   Added custom validation for business rules (e.g., Date checks in Patient, required contact in Doctor Profile).
+    *   Added client-side validation helpers (`validation-helpers.js`) with debouncing for improved UX (e.g., required fields on Patient forms).
 *   **Service & Repository Pattern:** Business logic is separated using services and data access using repositories.
 *   **Basic Search:** Implemented simple text search on list pages for Patients (Name, ContactInfo), Medications (Name), and Prescriptions (Patient Name).
 

@@ -59,6 +59,8 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/lib/imask/imask.min.js"></script>
+    <script src="~/js/validation-helpers.js"></script> @* Include helpers *@
     <script>
         // Using shared validation helpers
         document.addEventListener('DOMContentLoaded', function () {
@@ -74,7 +76,7 @@
             // Apply Input Masking for Phone Number
             if (phoneInput) {
                 const phoneMask = IMask(phoneInput, {
-                    mask: '+{20}1000000000', // Fixed country code + 9 digits
+                    mask: '+{20}1000000000', // Fixed country code + 10 digits
                     lazy: false // Show mask immediately
                 });
             }
@@ -83,20 +85,29 @@
             const contactRequiredHandler = () => validateContactMethodRequired(phoneInput, emailInput, phoneValidationSpan, emailValidationSpan);
             // Define the handler that calls the shared function for phone format
             const phoneFormatHandler = () => validatePhoneNumberFormat(phoneInput, phoneValidationSpan);
+            // License Handlers
             const licenseRequiredHandler = () => validateRequiredField(licenseInput, licenseValidationSpan, 'License Number');
+            const licenseFormatHandler = () => validateNumericRange(licenseInput, licenseValidationSpan, 4, 19, 'License Number'); // New handler
+            // Name Handler
             const nameRequiredHandler = () => validateRequiredField(nameInput, nameValidationSpan, 'Name');
 
-            // Add listeners to both fields
+            // Combine License Handlers
+            const combinedLicenseHandler = () => {
+                licenseRequiredHandler(); // Check required first
+                licenseFormatHandler();   // Then check format
+            };
+
+            // Add listeners to fields
             if (phoneInput) {
-                phoneInput.addEventListener('blur', contactRequiredHandler);
-                phoneInput.addEventListener('blur', phoneFormatHandler); // Also check format on blur
+                 phoneInput.addEventListener('blur', contactRequiredHandler);
+                 phoneInput.addEventListener('blur', phoneFormatHandler); // Also check format on blur
             }
             if (emailInput) {
                 emailInput.addEventListener('blur', contactRequiredHandler);
             }
             if (licenseInput) {
-                licenseInput.addEventListener('blur', licenseRequiredHandler);
-                licenseInput.addEventListener('input', debounce(licenseRequiredHandler, 500));
+                 licenseInput.addEventListener('blur', combinedLicenseHandler);
+                 licenseInput.addEventListener('input', debounce(combinedLicenseHandler, 500));
             }
             if (nameInput) {
                 nameInput.addEventListener('blur', nameRequiredHandler);
@@ -104,9 +115,9 @@
             }
             
             // Initial checks on load
-            contactRequiredHandler(); 
-            phoneFormatHandler(); 
-            licenseRequiredHandler();
+            contactRequiredHandler();
+            phoneFormatHandler();
+            combinedLicenseHandler(); // Run combined license check on load
             nameRequiredHandler();
         });
     </script>

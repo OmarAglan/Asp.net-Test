@@ -127,6 +127,7 @@
             // Validation handlers
             const nameRequiredHandler = () => validateRequiredField(nameInput, nameValidationSpan, 'Name');
             const contactRequiredHandler = () => validateRequiredField(contactInput, contactValidationSpan, 'Contact Info');
+            const contactFormatHandler = () => validateBasicContactFormat(contactInput, contactValidationSpan);
 
             // Add listeners
             if (nameInput) {
@@ -134,13 +135,18 @@
                 nameInput.addEventListener('input', debounce(nameRequiredHandler, 500));
             }
             if (contactInput) {
-                contactInput.addEventListener('blur', contactRequiredHandler);
-                contactInput.addEventListener('input', debounce(contactRequiredHandler, 500));
+                const combinedContactHandler = () => {
+                    contactRequiredHandler();
+                    contactFormatHandler();
+                };
+                contactInput.addEventListener('blur', combinedContactHandler);
+                contactInput.addEventListener('input', debounce(combinedContactHandler, 500));
             }
 
             // Initial checks on load
             nameRequiredHandler();
             contactRequiredHandler();
+            contactFormatHandler();
         });
     </script>
 }

@@ -64,22 +64,27 @@
                           <div class="col-md-4">
                              <label for="inputDosage" class="form-label">Dosage</label>
                              <input type="text" id="inputDosage" class="form-control" placeholder="e.g., 500mg, 10ml" />
+                             <span id="inputDosageValidation" class="text-danger d-block"></span>
                          </div>
                           <div class="col-md-4">
                              <label for="inputFrequency" class="form-label">Frequency</label>
                              <input type="text" id="inputFrequency" class="form-control" placeholder="e.g., Twice daily" />
+                             <span id="inputFrequencyValidation" class="text-danger d-block"></span>
                          </div>
                          <div class="col-md-4">
                              <label for="inputDuration" class="form-label">Duration</label>
                              <input type="text" id="inputDuration" class="form-control" placeholder="e.g., 10 days" />
+                             <span id="inputDurationValidation" class="text-danger d-block"></span>
                          </div>
                          <div class="col-md-6">
                              <label for="inputQuantity" class="form-label">Quantity <span class="text-danger">*</span></label>
                              <input type="text" id="inputQuantity" class="form-control" />
+                             <span id="inputQuantityValidation" class="text-danger d-block"></span>
                          </div>
                           <div class="col-md-6">
                              <label for="inputRefills" class="form-label">Refills</label>
                              <input type="number" id="inputRefills" class="form-control" />
+                             <span id="inputRefillsValidation" class="text-danger d-block"></span>
                          </div>
                          <div class="col-md-12">
                              <label for="inputInstructions" class="form-label">Instructions <span class="text-danger">*</span></label>
@@ -167,17 +172,79 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/validation-helpers.js"></script> @* Ensure helper script is included *@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const btnAddItem = document.getElementById('btnAddItem');
             const itemsTableBody = document.querySelector('#prescriptionItemsTable tbody');
             const prescriptionForm = document.getElementById('prescriptionForm');
             const noItemsMessage = document.getElementById('noItemsMessage');
-            const formSubmitErrorSpan = document.getElementById('formSubmitError'); 
+            const formSubmitErrorSpan = document.getElementById('formSubmitError');
+            
+            // Input fields in the 'Add Item' section
+            const selectMedication = document.getElementById('selectMedication');
+            const inputDosage = document.getElementById('inputDosage');
+            const inputFrequency = document.getElementById('inputFrequency');
+            const inputDuration = document.getElementById('inputDuration');
+            const inputQuantity = document.getElementById('inputQuantity');
+            const inputInstructions = document.getElementById('inputInstructions');
+            const inputRefills = document.getElementById('inputRefills'); // Assuming 0 if empty
+            const inputNotes = document.getElementById('inputNotes'); // Optional
+
+            // Validation spans for the 'Add Item' section
+            const dosageValidationSpan = document.getElementById('inputDosageValidation');
+            const frequencyValidationSpan = document.getElementById('inputFrequencyValidation');
+            const durationValidationSpan = document.getElementById('inputDurationValidation');
+            const quantityValidationSpan = document.getElementById('inputQuantityValidation');
+            const refillsValidationSpan = document.getElementById('inputRefillsValidation');
+            // Add span for Instructions if needed
 
             // Initialize index based on server-rendered hidden fields
             let initialItemCount = prescriptionForm.querySelectorAll('input[type="hidden"][name^="PrescriptionCreate.Items"][name$="MedicationId"]').length;
             let itemIndex = initialItemCount;
+
+            // --- Validation Handlers for Add Item section --- 
+            const validateDosage = () => validateRequiredField(inputDosage, dosageValidationSpan, 'Dosage');
+            const validateFrequency = () => validateRequiredField(inputFrequency, frequencyValidationSpan, 'Frequency');
+            const validateDuration = () => validateRequiredField(inputDuration, durationValidationSpan, 'Duration');
+            const validateQuantityRequired = () => validateRequiredField(inputQuantity, quantityValidationSpan, 'Quantity');
+            const validateQuantityFormat = () => validatePositiveNumber(inputQuantity, quantityValidationSpan, 'Quantity');
+            const validateRefillsFormat = () => validateNonNegativeInteger(inputRefills, refillsValidationSpan, 'Refills');
+            // Add handler for Instructions required validation
+
+            // Combined handlers
+            const combinedQuantityHandler = () => {
+                validateQuantityRequired();
+                validateQuantityFormat();
+            };
+
+            // --- Attach Listeners to Add Item fields ---
+            if (inputDosage) {
+                inputDosage.addEventListener('blur', validateDosage);
+                inputDosage.addEventListener('input', debounce(validateDosage, 500));
+            }
+             if (inputFrequency) {
+                inputFrequency.addEventListener('blur', validateFrequency);
+                inputFrequency.addEventListener('input', debounce(validateFrequency, 500));
+            }
+             if (inputDuration) {
+                inputDuration.addEventListener('blur', validateDuration);
+                inputDuration.addEventListener('input', debounce(validateDuration, 500));
+            }
+            if (inputQuantity) {
+                inputQuantity.addEventListener('blur', combinedQuantityHandler);
+                inputQuantity.addEventListener('input', debounce(combinedQuantityHandler, 500));
+            }
+            if (inputRefills) {
+                inputRefills.addEventListener('blur', validateRefillsFormat); // Only format check needed
+                inputRefills.addEventListener('input', debounce(validateRefillsFormat, 500));
+            }
+             // Add listeners for Instructions if needed
+
+             // --- Initial Validation Checks for Add Item section ---
+             // Optional: Run checks on load if needed
+             // combinedQuantityHandler();
+             // validateRefillsFormat();
 
             function updateNoItemsMessage() {
                 const hasRows = itemsTableBody.rows.length > 0;
@@ -252,80 +319,122 @@
             });
 
 
-            btnAddItem.addEventListener('click', async function () {
-                // --- (1. Get values - unchanged) ---
-                 const medicationSelect = document.getElementById('selectMedication');
-                 const medicationId = medicationSelect.value;
-                 const medicationName = medicationSelect.options[medicationSelect.selectedIndex].text;
-                 const dosage = document.getElementById('inputDosage').value || null;
-                 const frequency = document.getElementById('inputFrequency').value || null;
-                 const duration = document.getElementById('inputDuration').value || null;
-                 const quantity = document.getElementById('inputQuantity').value;
-                 const instructions = document.getElementById('inputInstructions').value;
-                 const refills = document.getElementById('inputRefills').value || null;
-                 const notes = document.getElementById('inputNotes').value || null;
+            btnAddItem.addEventListener('click', async function() { // Make async for await
+                const medicationId = selectMedication.value;
+                const medicationName = selectMedication.options[selectMedication.selectedIndex]?.text;
+                const dosage = inputDosage.value;
+                const frequency = inputFrequency.value;
+                const duration = inputDuration.value;
+                const quantity = inputQuantity.value; // Required
+                const instructions = inputInstructions.value; // Required
+                const refills = inputRefills.value; // Optional, default?
+                const notes = inputNotes.value; // Optional
 
-                // --- (2. Basic Client Validation - unchanged) ---
-                if (!medicationId || !quantity || !instructions) {
-                    alert('Please select a medication and enter quantity and instructions.');
-                    return;
+                // --- Trigger validation before adding --- 
+                let isValid = true;
+                if (!medicationId) { 
+                    /* Handle medication selection error - maybe add a span */ 
+                    selectMedication.classList.add('is-invalid');
+                    isValid = false; 
+                } else {
+                    selectMedication.classList.remove('is-invalid');
+                }
+
+                if (!validateDosage()) isValid = false; // validateRequiredField returns boolean
+                if (!validateFrequency()) isValid = false;
+                if (!validateDuration()) isValid = false;
+                if (!combinedQuantityHandler()) isValid = false; // Run combined check
+                if (!validateRefillsFormat()) isValid = false; // Check refills format (optional field)
+                
+                // Add required validation for Instructions
+                // if (!validateInstructionsRequired()) isValid = false;
+                if (!instructions) { 
+                     /* Handle instructions required error - maybe add a span */ 
+                     inputInstructions.classList.add('is-invalid');
+                     isValid = false; 
+                } else {
+                    inputInstructions.classList.remove('is-invalid');
                 }
                 
-                 // --- (AJAX Check - unchanged) ---
-                 try {
-                    const response = await fetch(`?handler=CheckMedicationExists&id=${medicationId}`);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const data = await response.json();
-                    if (!data.exists) {
-                        alert(`Sorry, the selected medication '${medicationName}' is no longer available or invalid.`);
-                        medicationSelect.value = '';
-                        return;
-                    }
-                } catch (error) {
-                    console.error('Error checking medication existence:', error);
-                    alert('An error occurred verifying medication. Please try again.');
-                    return;
+
+                if (!isValid) {
+                    // Maybe show a general message or rely on individual field highlights
+                    console.log("Add item validation failed");
+                    return; // Stop if validation fails
                 }
 
-                // --- (3. Create table row - unchanged) ---
+                // --- (Optional) AJAX Check for Medication ID Existence (example) --- 
+                // try {
+                //     const response = await fetch(`/Prescriptions/Create?handler=CheckMedicationExists&medicationId=${medicationId}`);
+                //     if (!response.ok) throw new Error('Network response was not ok.');
+                //     const data = await response.json();
+                //     if (!data.exists) {
+                //         // Display error next to medication select
+                //         console.error(`Medication ID ${medicationId} not found.`);
+                //         // Optionally show error message near selectMedication
+                //         return;
+                //     }
+                // } catch (error) {
+                //     console.error('Error checking medication:', error);
+                //     // Handle fetch error - maybe prevent adding item?
+                //     return;
+                // }
+
+                // --- Add item to table --- 
                 const newRow = itemsTableBody.insertRow();
                 newRow.innerHTML = `
-                    <td>${medicationName}</td>
-                    <td>${dosage ?? ''}</td>
-                    <td>${frequency ?? ''}</td>
-                    <td>${duration ?? ''}</td>
+                    <td>${medicationName || 'Medication Not Selected'}</td>
+                    <td>${dosage}</td>
+                    <td>${frequency}</td>
+                    <td>${duration}</td>
                     <td>${quantity}</td>
                     <td>${instructions}</td>
-                    <td>${refills ?? ''}</td>
-                    <td>${notes ?? ''}</td>
+                    <td>${refills || 0}</td>
+                    <td>${notes}</td>
                     <td><button type="button" class="btn btn-danger btn-sm btn-remove-item">Remove</button></td>
                 `;
 
-                // --- (4. Create hidden fields) ---
-                const baseName = `PrescriptionCreate.Items[${itemIndex}]`; // Use current itemIndex
+                 // --- Add hidden fields --- 
+                const baseName = `PrescriptionCreate.Items[${itemIndex}]`;
                 addHiddenInput(`${baseName}.MedicationId`, medicationId);
                 addHiddenInput(`${baseName}.Dosage`, dosage);
                 addHiddenInput(`${baseName}.Frequency`, frequency);
                 addHiddenInput(`${baseName}.Duration`, duration);
                 addHiddenInput(`${baseName}.Quantity`, quantity);
                 addHiddenInput(`${baseName}.Instructions`, instructions);
-                addHiddenInput(`${baseName}.Refills`, refills);
+                addHiddenInput(`${baseName}.Refills`, refills || 0);
                 addHiddenInput(`${baseName}.Notes`, notes);
 
-                // --- (Attach listener - unchanged) ---
+                itemIndex++; // Increment index for next item
+
+                // Attach listener to the new remove button
                 attachRemoveListener(newRow.querySelector('.btn-remove-item'));
 
-                // --- (5. Clear inputs - unchanged) ---
-                medicationSelect.value = '';
-                document.getElementById('inputDosage').value = '';
-                document.getElementById('inputFrequency').value = '';
-                document.getElementById('inputDuration').value = '';
-                document.getElementById('inputQuantity').value = '';
-                document.getElementById('inputInstructions').value = '';
-                document.getElementById('inputRefills').value = '';
-                document.getElementById('inputNotes').value = '';
+                // Clear input fields after adding
+                selectMedication.value = '';
+                inputDosage.value = '';
+                inputFrequency.value = '';
+                inputDuration.value = '';
+                inputQuantity.value = '';
+                inputInstructions.value = '';
+                inputRefills.value = '';
+                inputNotes.value = '';
 
-                itemIndex++; // Increment index for the next dynamically added item
+                // Clear validation messages for the add item section
+                if(dosageValidationSpan) dosageValidationSpan.textContent = '';
+                if(frequencyValidationSpan) frequencyValidationSpan.textContent = '';
+                if(durationValidationSpan) durationValidationSpan.textContent = '';
+                if(quantityValidationSpan) quantityValidationSpan.textContent = '';
+                if(refillsValidationSpan) refillsValidationSpan.textContent = '';
+                // Clear instructions validation if span added
+                inputDosage.classList.remove('is-invalid');
+                inputFrequency.classList.remove('is-invalid');
+                inputDuration.classList.remove('is-invalid');
+                inputQuantity.classList.remove('is-invalid');
+                inputRefills.classList.remove('is-invalid');
+                inputInstructions.classList.remove('is-invalid');
+                selectMedication.classList.remove('is-invalid');
+
                 updateNoItemsMessage();
             });
 

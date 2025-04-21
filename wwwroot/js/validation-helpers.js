@@ -219,4 +219,190 @@ function debounce(func, delay) {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => func.apply(context, args), delay);
     }
+}
+
+/**
+ * Performs a basic validation check to see if the input looks like a phone number or email.
+ * Does not validate if the input is empty (let required validator handle that).
+ * @param {HTMLInputElement} inputElement The input element.
+ * @param {HTMLElement} validationSpan The span element to display validation messages.
+ */
+function validateBasicContactFormat(inputElement, validationSpan) {
+    if (!inputElement || !validationSpan) return;
+    const value = inputElement.value.trim();
+    const formatErrorMessage = 'Please enter a valid phone number or email format.';
+
+    // Only validate format if the field is not empty
+    if (value) {
+        // Basic checks: contains '@' and '.' for email, or looks like a phone number (digits, +, -, spaces)
+        const looksLikeEmail = value.includes('@') && value.includes('.');
+        const looksLikePhone = /^[+\d][\d\s-]*\d$/.test(value); // Starts with + or digit, ends with digit, allows digits, space, hyphen in between
+
+        if (!looksLikeEmail && !looksLikePhone) {
+            validationSpan.textContent = formatErrorMessage;
+            inputElement.classList.add('is-invalid');
+        } else {
+            // Clear only the format error message if it's currently displayed
+            if (validationSpan.textContent === formatErrorMessage) {
+                validationSpan.textContent = '';
+            }
+            // Only remove 'is-invalid' if no other validation message exists for this span
+            if (!validationSpan.textContent) {
+                inputElement.classList.remove('is-invalid');
+            }
+        }
+    } else {
+        // If the field is empty, clear the format error message if it's there
+        if (validationSpan.textContent === formatErrorMessage) {
+            validationSpan.textContent = '';
+        }
+        // If the field is empty and no other message exists, remove invalid class
+        // This might be handled by the required field validator too, but ensures cleanup
+        if (!validationSpan.textContent) { 
+            inputElement.classList.remove('is-invalid');
+         }
+    }
+}
+
+/**
+ * Validates if a string contains only digits and its length is within a specified range.
+ * Does not validate if the input is empty (let required validator handle that).
+ * @param {HTMLInputElement} inputElement The input element.
+ * @param {HTMLElement} validationSpan The span element to display validation messages.
+ * @param {number} minLength The minimum required length (inclusive).
+ * @param {number} maxLength The maximum allowed length (inclusive).
+ * @param {string} [fieldName='Field'] Name of the field for the error message.
+ */
+function validateNumericRange(inputElement, validationSpan, minLength, maxLength, fieldName = 'Field') {
+    if (!inputElement || !validationSpan) return false; // Return validity
+    const value = inputElement.value.trim();
+    const digitRegex = /^\d+$/;
+    const formatErrorMessage = `${fieldName} must contain only digits.`;
+    const lengthErrorMessage = `${fieldName} must be between ${minLength} and ${maxLength} digits long.`;
+    let isValid = true;
+
+    // Only validate format if the field is not empty
+    if (value) {
+        let currentError = '';
+        if (!digitRegex.test(value)) {
+            currentError = formatErrorMessage;
+            isValid = false;
+        } else if (value.length < minLength || value.length > maxLength) {
+            currentError = lengthErrorMessage;
+            isValid = false;
+        }
+
+        // Update validation message and class
+        if (!isValid) {
+            validationSpan.textContent = currentError;
+            inputElement.classList.add('is-invalid');
+        } else {
+            // Clear only our specific error messages
+            if (validationSpan.textContent === formatErrorMessage || validationSpan.textContent === lengthErrorMessage) {
+                validationSpan.textContent = '';
+            }
+             // Only remove 'is-invalid' if no other validation message exists
+            if (!validationSpan.textContent) {
+                inputElement.classList.remove('is-invalid');
+            }
+        }
+    } else {
+        // If the field is empty, clear our specific error messages
+        if (validationSpan.textContent === formatErrorMessage || validationSpan.textContent === lengthErrorMessage) {
+            validationSpan.textContent = '';
+        }
+        // If empty and no other message, remove invalid class (required validator might handle this)
+        if (!validationSpan.textContent) {
+            inputElement.classList.remove('is-invalid');
+        }
+        // It's considered valid from *this* validator's perspective if empty
+        isValid = true; 
+    }
+    return isValid; // Return the validity status
+}
+
+/**
+ * Validates if a value is a positive number (integer or decimal).
+ * Does not validate if the input is empty.
+ * @param {HTMLInputElement} inputElement The input element.
+ * @param {HTMLElement} validationSpan The span element to display validation messages.
+ * @param {string} [fieldName='Field'] Name of the field for the error message.
+ */
+function validatePositiveNumber(inputElement, validationSpan, fieldName = 'Field') {
+    if (!inputElement || !validationSpan) return false;
+    const value = inputElement.value.trim();
+    const errorMessage = `${fieldName} must be a positive number.`;
+    let isValid = true;
+
+    if (value) {
+        const numberValue = parseFloat(value);
+        if (isNaN(numberValue) || numberValue <= 0) {
+            validationSpan.textContent = errorMessage;
+            inputElement.classList.add('is-invalid');
+            isValid = false;
+        } else {
+             // Clear only our specific error message
+            if (validationSpan.textContent === errorMessage) {
+                validationSpan.textContent = '';
+            }
+             // Only remove 'is-invalid' if no other validation message exists
+            if (!validationSpan.textContent) {
+                inputElement.classList.remove('is-invalid');
+            }
+        }
+    } else {
+         // Clear our specific error message if the field is empty
+         if (validationSpan.textContent === errorMessage) {
+            validationSpan.textContent = '';
+         }
+        // If empty and no other message, remove invalid class
+        if (!validationSpan.textContent) {
+            inputElement.classList.remove('is-invalid');
+         }
+         isValid = true; // Valid from this validator's perspective if empty
+    }
+     return isValid;
+}
+
+/**
+ * Validates if a value is a non-negative integer (0, 1, 2...).
+ * Does not validate if the input is empty.
+ * @param {HTMLInputElement} inputElement The input element.
+ * @param {HTMLElement} validationSpan The span element to display validation messages.
+ * @param {string} [fieldName='Field'] Name of the field for the error message.
+ */
+function validateNonNegativeInteger(inputElement, validationSpan, fieldName = 'Field') {
+    if (!inputElement || !validationSpan) return false;
+    const value = inputElement.value.trim();
+    const errorMessage = `${fieldName} must be a non-negative integer (0, 1, 2...).`;
+    const integerRegex = /^\d+$/;
+    let isValid = true;
+
+    if (value) {
+        if (!integerRegex.test(value)) { // Checks for digits only, implicitly >= 0
+            validationSpan.textContent = errorMessage;
+            inputElement.classList.add('is-invalid');
+            isValid = false;
+        } else {
+             // Clear only our specific error message
+            if (validationSpan.textContent === errorMessage) {
+                validationSpan.textContent = '';
+            }
+             // Only remove 'is-invalid' if no other validation message exists
+            if (!validationSpan.textContent) {
+                inputElement.classList.remove('is-invalid');
+            }
+        }
+    } else {
+        // Clear our specific error message if the field is empty
+         if (validationSpan.textContent === errorMessage) {
+            validationSpan.textContent = '';
+         }
+        // If empty and no other message, remove invalid class
+        if (!validationSpan.textContent) {
+            inputElement.classList.remove('is-invalid');
+         }
+        isValid = true; // Valid from this validator's perspective if empty
+    }
+    return isValid;
 } 
