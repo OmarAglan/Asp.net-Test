@@ -84,30 +84,79 @@
     <script src="~/js/validation-helpers.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Get form and submit button
+            const patientForm = document.querySelector('form'); 
+            const submitButton = patientForm ? patientForm.querySelector('button[type="submit"]') : null;
+
             const dobInput = document.getElementById('Patient_DateOfBirth');
             const dobValidationSpan = document.querySelector('span[data-valmsg-for="Patient.DateOfBirth"]');
             const lastVisitInput = document.getElementById('Patient_LastVisitDate');
             const lastVisitValidationSpan = document.querySelector('span[data-valmsg-for="Patient.LastVisitDate"]');
 
-            if (dobInput) {
-                dobInput.addEventListener('blur', () => validateDateNotFuture(dobInput, dobValidationSpan, 'Date of Birth'));
-                validateDateNotFuture(dobInput, dobValidationSpan, 'Date of Birth'); // Initial check
-            }
-            if (lastVisitInput) {
-                lastVisitInput.addEventListener('blur', () => validateLastVisitNotFuture(lastVisitInput, lastVisitValidationSpan, 'Last Visit Date'));
-                validateLastVisitNotFuture(lastVisitInput, lastVisitValidationSpan, 'Last Visit Date'); // Initial check
+            // Function to update submit button state
+            function updateSubmitButtonState() {
+                if (!submitButton || !patientForm) return;
+                const isValid = isFormClientSideValid(patientForm);
+                submitButton.disabled = !isValid;
             }
 
-            // Get input elements and validation spans for Name and ContactInfo
+            // Individual date validation handlers (ensure not in future)
+            const validateDobNotFuture = () => validateDateNotFuture(dobInput, dobValidationSpan, 'Date of Birth');
+            const validateLastVisitNotFutureHandler = () => validateLastVisitNotFuture(lastVisitInput, lastVisitValidationSpan, 'Last Visit Date');
+
+            // Cross-field validation handler (LastVisit > DOB)
+            const dobVsLastVisitHandler = () => {
+                validateDateBAfterDateA(
+                    dobInput,               // Date A
+                    lastVisitInput,         // Date B
+                    dobValidationSpan,      // Span A
+                    lastVisitValidationSpan,// Span B
+                    'Date of Birth',        // Name A
+                    'Last Visit Date'       // Name B
+                );
+                // Update button state after cross-field check too
+                updateSubmitButtonState(); 
+            };
+
+            // Combined handlers for attaching to events
+            const combinedDobHandler = () => {
+                validateDobNotFuture();
+                dobVsLastVisitHandler(); // This now calls updateSubmitButtonState
+            };
+            const combinedLastVisitHandler = () => {
+                validateLastVisitNotFutureHandler();
+                dobVsLastVisitHandler(); // This now calls updateSubmitButtonState
+            };
+
+
+            if (dobInput) {
+                dobInput.addEventListener('blur', combinedDobHandler);
+                dobInput.addEventListener('change', combinedDobHandler); 
+            }
+            if (lastVisitInput) {
+                lastVisitInput.addEventListener('blur', combinedLastVisitHandler);
+                 lastVisitInput.addEventListener('change', combinedLastVisitHandler);
+            }
+
+            // --- Name and Contact Info Validation (Existing) ---
             const nameInput = document.getElementById('Patient_Name');
             const contactInput = document.getElementById('Patient_ContactInfo');
             const nameValidationSpan = document.querySelector('span[data-valmsg-for="Patient.Name"]');
             const contactValidationSpan = document.querySelector('span[data-valmsg-for="Patient.ContactInfo"]');
 
             // Validation handlers
-            const nameRequiredHandler = () => validateRequiredField(nameInput, nameValidationSpan, 'Name');
-            const contactRequiredHandler = () => validateRequiredField(contactInput, contactValidationSpan, 'Contact Info');
-            const contactFormatHandler = () => validateBasicContactFormat(contactInput, contactValidationSpan);
+            const nameRequiredHandler = () => {
+                 validateRequiredField(nameInput, nameValidationSpan, 'Name');
+                 updateSubmitButtonState();
+            };
+            const contactRequiredHandler = () => {
+                 validateRequiredField(contactInput, contactValidationSpan, 'Contact Info');
+                 // No button update here, combined handler does it
+            };
+            const contactFormatHandler = () => {
+                 validateBasicContactFormat(contactInput, contactValidationSpan);
+                 // No button update here, combined handler does it
+            };
 
             // Add listeners
             if (nameInput) {
@@ -116,17 +165,21 @@
             }
             if (contactInput) {
                 const combinedContactHandler = () => {
-                    contactRequiredHandler();
-                    contactFormatHandler();
+                    contactRequiredHandler(); 
+                    contactFormatHandler();   
+                    updateSubmitButtonState(); // Update button state after combined validation
                 };
                 contactInput.addEventListener('blur', combinedContactHandler);
                 contactInput.addEventListener('input', debounce(combinedContactHandler, 500));
             }
 
             // Initial checks on load
+            combinedDobHandler(); 
+            combinedLastVisitHandler(); 
             nameRequiredHandler();
-            contactRequiredHandler();
-            contactFormatHandler();
+            contactRequiredHandler(); 
+            contactFormatHandler();   
+            updateSubmitButtonState(); // Set initial button state
         });
     </script>
 }

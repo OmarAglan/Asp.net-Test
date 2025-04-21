@@ -64,6 +64,10 @@
     <script>
         // Using shared validation helpers
         document.addEventListener('DOMContentLoaded', function () {
+            // Get form and submit button
+            const profileForm = document.querySelector('form');
+            const submitButton = profileForm ? profileForm.querySelector('button[type="submit"]') : null;
+
             const phoneInput = document.getElementById('DoctorProfile_ContactPhone');
             const emailInput = document.getElementById('DoctorProfile_ContactEmail');
             const phoneValidationSpan = document.querySelector('span[data-valmsg-for="DoctorProfile.ContactPhone"]');
@@ -73,6 +77,13 @@
             const nameInput = document.getElementById('DoctorProfile_Name');
             const nameValidationSpan = document.querySelector('span[data-valmsg-for="DoctorProfile.Name"]');
             
+             // Function to update submit button state
+            function updateSubmitButtonState() {
+                if (!submitButton || !profileForm) return;
+                const isValid = isFormClientSideValid(profileForm);
+                submitButton.disabled = !isValid;
+            }
+
             // Apply Input Masking for Phone Number
             if (phoneInput) {
                 const phoneMask = IMask(phoneInput, {
@@ -81,29 +92,38 @@
                 });
             }
 
-            // Define the handler that calls the shared function for required contact
-            const contactRequiredHandler = () => validateContactMethodRequired(phoneInput, emailInput, phoneValidationSpan, emailValidationSpan);
-            // Define the handler that calls the shared function for phone format
-            const phoneFormatHandler = () => validatePhoneNumberFormat(phoneInput, phoneValidationSpan);
             // License Handlers
             const licenseRequiredHandler = () => validateRequiredField(licenseInput, licenseValidationSpan, 'License Number');
-            const licenseFormatHandler = () => validateNumericRange(licenseInput, licenseValidationSpan, 4, 19, 'License Number'); // New handler
+            const licenseFormatHandler = () => validateNumericRange(licenseInput, licenseValidationSpan, 4, 19, 'License Number');
             // Name Handler
-            const nameRequiredHandler = () => validateRequiredField(nameInput, nameValidationSpan, 'Name');
-
-            // Combine License Handlers
-            const combinedLicenseHandler = () => {
-                licenseRequiredHandler(); // Check required first
-                licenseFormatHandler();   // Then check format
+            const nameRequiredHandler = () => {
+                validateRequiredField(nameInput, nameValidationSpan, 'Name');
+                updateSubmitButtonState(); // Update after name check
             };
+
+            // Define combined handlers that also update submit button
+            const combinedContactHandler = () => {
+                validateContactMethodRequired(phoneInput, emailInput, phoneValidationSpan, emailValidationSpan);
+                updateSubmitButtonState(); 
+            };
+            const combinedPhoneFormatHandler = () => {
+                validatePhoneNumberFormat(phoneInput, phoneValidationSpan);
+                updateSubmitButtonState();
+            };
+            const combinedLicenseHandler = () => {
+                licenseRequiredHandler();
+                licenseFormatHandler();
+                updateSubmitButtonState();
+            };
+
 
             // Add listeners to fields
             if (phoneInput) {
-                 phoneInput.addEventListener('blur', contactRequiredHandler);
-                 phoneInput.addEventListener('blur', phoneFormatHandler); // Also check format on blur
+                 phoneInput.addEventListener('blur', combinedContactHandler); // Checks required contact
+                 phoneInput.addEventListener('blur', combinedPhoneFormatHandler); // Checks format
             }
             if (emailInput) {
-                emailInput.addEventListener('blur', contactRequiredHandler);
+                emailInput.addEventListener('blur', combinedContactHandler); // Checks required contact
             }
             if (licenseInput) {
                  licenseInput.addEventListener('blur', combinedLicenseHandler);
@@ -115,10 +135,11 @@
             }
             
             // Initial checks on load
-            contactRequiredHandler();
-            phoneFormatHandler();
-            combinedLicenseHandler(); // Run combined license check on load
+            combinedContactHandler();
+            combinedPhoneFormatHandler(); 
+            combinedLicenseHandler();
             nameRequiredHandler();
+            updateSubmitButtonState(); // Final initial state check
         });
     </script>
 } 

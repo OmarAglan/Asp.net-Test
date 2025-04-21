@@ -405,4 +405,33 @@ function validateNonNegativeInteger(inputElement, validationSpan, fieldName = 'F
         isValid = true; // Valid from this validator's perspective if empty
     }
     return isValid;
+}
+
+/**
+ * Checks if a form is client-side valid by looking for visible validation messages
+ * and inputs with the 'is-invalid' class within a specific container (usually the form itself).
+ * @param {HTMLElement} formElement The form element or a container element.
+ * @returns {boolean} True if no validation errors are found, false otherwise.
+ */
+function isFormClientSideValid(formElement) {
+    if (!formElement) return true; // Default to valid if no form provided
+
+    // Check for any validation spans with text content
+    // Assumes validation spans have class 'text-danger' and are direct children or within standard structures
+    const validationSpans = formElement.querySelectorAll('span.text-danger[data-valmsg-for], span.text-danger[id$="Validation"]');
+    for (let span of validationSpans) {
+        if (span.textContent.trim() !== '') {
+            // console.log('Form invalid due to span:', span);
+            return false; // Found an error message
+        }
+    }
+
+    // Check for any input elements with the 'is-invalid' class
+    const invalidInputs = formElement.querySelectorAll('.is-invalid');
+    if (invalidInputs.length > 0) {
+        // console.log('Form invalid due to input:', invalidInputs[0]);
+        return false; // Found an input marked as invalid
+    }
+
+    return true; // No errors found
 } 

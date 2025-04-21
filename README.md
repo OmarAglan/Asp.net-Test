@@ -15,7 +15,7 @@ To provide a system for doctors to issue and manage prescriptions, patients to v
 *   **Authentication:** ASP.NET Core Identity (Planned)
 *   **Core Models:** Includes Patients, Doctors, Prescriptions, Medications with relationships, audit fields (`CreatedAt`, `UpdatedAt`), status tracking (e.g., `PrescriptionStatus` enum), and specific fields for visits, payments, etc.
 
-## Features (v0.9.7.5)
+## Features (v0.9.8.2)
 
 *   **Activation & Licensing:** Application requires activation via a license key (simple string check). Access is controlled by an `ActivationCheckPageFilter`.
 *   **Doctor Profile Management:** 

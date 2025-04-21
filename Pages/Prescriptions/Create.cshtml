@@ -180,6 +180,7 @@
             const prescriptionForm = document.getElementById('prescriptionForm');
             const noItemsMessage = document.getElementById('noItemsMessage');
             const formSubmitErrorSpan = document.getElementById('formSubmitError');
+            const submitButton = prescriptionForm ? prescriptionForm.querySelector('input[type="submit"]') : null;
             
             // Input fields in the 'Add Item' section
             const selectMedication = document.getElementById('selectMedication');
@@ -198,6 +199,14 @@
             const quantityValidationSpan = document.getElementById('inputQuantityValidation');
             const refillsValidationSpan = document.getElementById('inputRefillsValidation');
             // Add span for Instructions if needed
+
+            // Main form fields
+            const patientSelect = document.getElementById('PrescriptionCreate_PatientId'); // Assuming ID matches asp-for
+            const expiryDateInput = document.getElementById('PrescriptionCreate_ExpiryDate');
+            const nextAppointmentDateInput = document.getElementById('PrescriptionCreate_NextAppointmentDate');
+            const patientValidationSpan = document.querySelector('span[data-valmsg-for="PrescriptionCreate.PatientId"]');
+            const expiryDateValidationSpan = document.querySelector('span[data-valmsg-for="PrescriptionCreate.ExpiryDate"]');
+            const nextAppointmentDateValidationSpan = document.querySelector('span[data-valmsg-for="PrescriptionCreate.NextAppointmentDate"]');
 
             // Initialize index based on server-rendered hidden fields
             let initialItemCount = prescriptionForm.querySelectorAll('input[type="hidden"][name^="PrescriptionCreate.Items"][name$="MedicationId"]').length;
@@ -246,9 +255,29 @@
              // combinedQuantityHandler();
              // validateRefillsFormat();
 
+            // Function to update main submit button state
+            function updateMainSubmitButtonState() {
+                if (!submitButton || !prescriptionForm) return;
+
+                // Check validity of main form fields ONLY (Patient, Dates)
+                let mainFieldsValid = true;
+                if (patientValidationSpan && patientValidationSpan.textContent.trim() !== '') mainFieldsValid = false;
+                if (expiryDateValidationSpan && expiryDateValidationSpan.textContent.trim() !== '') mainFieldsValid = false;
+                if (nextAppointmentDateValidationSpan && nextAppointmentDateValidationSpan.textContent.trim() !== '') mainFieldsValid = false;
+                if (patientSelect && patientSelect.classList.contains('is-invalid')) mainFieldsValid = false;
+                if (expiryDateInput && expiryDateInput.classList.contains('is-invalid')) mainFieldsValid = false;
+                if (nextAppointmentDateInput && nextAppointmentDateInput.classList.contains('is-invalid')) mainFieldsValid = false;
+                
+                // Check if at least one item exists
+                const hasItems = itemsTableBody.rows.length > 0;
+
+                submitButton.disabled = !(mainFieldsValid && hasItems);
+            }
+
             function updateNoItemsMessage() {
                 const hasRows = itemsTableBody.rows.length > 0;
                 noItemsMessage.style.display = hasRows ? 'none' : 'block';
+                updateMainSubmitButtonState(); // Update button when item count changes
             }
             
             // Function to add hidden input (simplified)
@@ -454,12 +483,28 @@
                  }
             });
 
-            // Client-side Date Validation (using shared helper)
-            const expiryDateInput = document.getElementById('PrescriptionCreate_ExpiryDate');
-            const nextAppointmentDateInput = document.getElementById('PrescriptionCreate_NextAppointmentDate');
-            const expiryDateValidationSpan = document.querySelector('span[data-valmsg-for="PrescriptionCreate.ExpiryDate"]');
-            const nextAppointmentDateValidationSpan = document.querySelector('span[data-valmsg-for="PrescriptionCreate.NextAppointmentDate"]');
+            // --- Main Form Field Validation --- 
+            // Patient Selection (Required)
+             const validatePatientSelected = () => {
+                 if(patientSelect && !patientSelect.value) {
+                    if(patientValidationSpan) patientValidationSpan.textContent = 'Patient is required.';
+                    patientSelect.classList.add('is-invalid');
+                 } else {
+                     if(patientValidationSpan && patientValidationSpan.textContent === 'Patient is required.') {
+                        patientValidationSpan.textContent = '';
+                     }
+                     if(patientSelect && !patientValidationSpan?.textContent) {
+                         patientSelect.classList.remove('is-invalid');
+                     }
+                 }
+                 updateMainSubmitButtonState();
+             };
+             if(patientSelect) {
+                 patientSelect.addEventListener('change', validatePatientSelected);
+                 patientSelect.addEventListener('blur', validatePatientSelected);
+             }
 
+            // Client-side Date Validation (using shared helper)
             // Define handler for cross-field date validation
             const expiryVsAppointmentHandler = () => {
                 validateDateBAfterDateA(
@@ -470,13 +515,14 @@
                     'Next Appointment Date', 
                     'Expiry Date'
                 );
+                 updateMainSubmitButtonState(); // Update after cross-check
             };
 
             if (expiryDateInput) {
                 const prefix = expiryDateInput.labels[0]?.textContent || 'Expiry Date';
                 const handler = () => {
                      validateDateIsFuture(expiryDateInput, expiryDateValidationSpan, prefix);
-                     expiryVsAppointmentHandler(); // Also check cross-field rule
+                     expiryVsAppointmentHandler(); // This calls updateMainSubmitButtonState
                 };
                 expiryDateInput.addEventListener('change', handler);
                 expiryDateInput.addEventListener('blur', handler);
@@ -485,14 +531,24 @@
                 const prefix = nextAppointmentDateInput.labels[0]?.textContent || 'Next Appointment Date';
                  const handler = () => {
                      validateDateIsFuture(nextAppointmentDateInput, nextAppointmentDateValidationSpan, prefix);
-                     expiryVsAppointmentHandler(); // Also check cross-field rule
+                     expiryVsAppointmentHandler(); // This calls updateMainSubmitButtonState
                  };
                 nextAppointmentDateInput.addEventListener('change', handler);
                 nextAppointmentDateInput.addEventListener('blur', handler);
             }
 
-            // Initial state check
-            updateNoItemsMessage();
+            // --- Initial State Checks ---
+            updateNoItemsMessage(); // This also calls updateMainSubmitButtonState initially
+            validatePatientSelected(); // Initial patient check
+            // Initial date checks (if needed, else rely on blur/change)
+             if (expiryDateInput?.value) {
+                 validateDateIsFuture(expiryDateInput, expiryDateValidationSpan, expiryDateInput.labels[0]?.textContent || 'Expiry Date');
+             }
+             if (nextAppointmentDateInput?.value) {
+                 validateDateIsFuture(nextAppointmentDateInput, nextAppointmentDateValidationSpan, nextAppointmentDateInput.labels[0]?.textContent || 'Next Appointment Date');
+             }
+             expiryVsAppointmentHandler(); // Initial cross check
+            updateMainSubmitButtonState(); // Final overall check
         });
     </script>
 } 

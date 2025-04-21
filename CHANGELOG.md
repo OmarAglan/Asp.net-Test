@@ -4,19 +4,31 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.9.8.2] - YYYY-MM-DD
+
+### Added
+
+*   Added client-side "required" validation for the Name field and dynamic submit button logic to `Pages/Medications/Create.cshtml` and `Pages/Medications/Edit.cshtml` for consistency with other forms.
+
+### Changed
+
+*   Reviewed Patient, Doctor Profile, and Prescription Create forms to ensure consistent application of client-side validation enhancements (required, format, cross-field checks, debouncing, dynamic submit button).
+
 ## [0.9.8.0] - YYYY-MM-DD
 
 ### Added
 
 *   Added client-side validation helper functions (`validateBasicContactFormat`, `validateNumericRange`, `validatePositiveNumber`, `validateNonNegativeInteger`) to `wwwroot/js/validation-helpers.js`.
 *   Added client-side "required" validation for Dosage, Frequency, and Duration inputs in the "Add Item" section of `Pages/Prescriptions/Create.cshtml`.
+*   Added client-side "required" validation for the Name field on `Pages/Medications/Create.cshtml` and `Pages/Medications/Edit.cshtml`.
 
 ### Changed
 
 *   Updated `Pages/Patients/Create.cshtml` and `Pages/Patients/Edit.cshtml` to add basic format validation (phone/email check) to the `ContactInfo` field using `validateBasicContactFormat`.
 *   Updated `Pages/DoctorProfile/Setup.cshtml` and `Pages/DoctorProfile/Edit.cshtml` to add numeric range validation (digits, length 4-19) to the `LicenseNumber` field using `validateNumericRange`.
 *   Updated `Pages/Prescriptions/Create.cshtml` to use `validatePositiveNumber` for the Quantity input and `validateNonNegativeInteger` for the Refills input in the "Add Item" section.
-*   Updated `ROADMAP.md` to reflect completion of Validation Phase B.2 and progress on B.3.
+*   Updated all forms with client-side validation to include dynamic submit button disabling/enabling based on validation state.
+*   Updated `ROADMAP.md` to reflect completion of Validation Phases B.1-B.4.
 
 ## [0.9.7.5] - YYYY-MM-DD
 

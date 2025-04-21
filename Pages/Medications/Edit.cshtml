@@ -17,7 +17,7 @@
             <div class="form-group">
                 <span class="text-danger">*</span>
                 <label asp-for="Medication.Name" class="control-label"></label>
-                <input asp-for="Medication.Name" class="form-control" />
+                <input asp-for="Medication.Name" class="form-control" id="Medication_Name" />
                 <span asp-validation-for="Medication.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -63,4 +63,39 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/validation-helpers.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get form and submit button
+            const medicationForm = document.querySelector('form');
+            const submitButton = medicationForm ? medicationForm.querySelector('input[type="submit"], button[type="submit"]') : null;
+
+            // Get Name input and validation span
+            const nameInput = document.getElementById('Medication_Name');
+            const nameValidationSpan = document.querySelector('span[data-valmsg-for="Medication.Name"]');
+
+            // Function to update submit button state
+            function updateSubmitButtonState() {
+                if (!submitButton || !medicationForm) return;
+                const isValid = isFormClientSideValid(medicationForm);
+                submitButton.disabled = !isValid;
+            }
+
+            // Validation handler for Name
+            const nameRequiredHandler = () => {
+                validateRequiredField(nameInput, nameValidationSpan, 'Name');
+                updateSubmitButtonState(); // Update button state after validation
+            };
+
+            // Add listeners
+            if (nameInput) {
+                nameInput.addEventListener('blur', nameRequiredHandler);
+                nameInput.addEventListener('input', debounce(nameRequiredHandler, 500));
+            }
+
+            // Initial checks on load
+            if (nameInput) nameRequiredHandler();
+            updateSubmitButtonState(); // Set initial button state
+        });
+    </script>
 }

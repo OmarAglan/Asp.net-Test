@@ -74,12 +74,20 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="~/js/validation-helpers.js"></script>
     <script>
-        // Using shared validation helpers
         document.addEventListener('DOMContentLoaded', function () {
+            // Get form and submit button
+            const patientForm = document.querySelector('form'); // Assuming one form on the page
+            const submitButton = patientForm ? patientForm.querySelector('button[type="submit"]') : null;
+
+            // Get input elements and validation spans
+            const nameInput = document.getElementById('Patient_Name');
             const dobInput = document.getElementById('Patient_DateOfBirth');
             const lastVisitInput = document.getElementById('Patient_LastVisitDate');
             const dobValidationSpan = document.querySelector('span[data-valmsg-for="Patient.DateOfBirth"]');
             const lastVisitValidationSpan = document.querySelector('span[data-valmsg-for="Patient.LastVisitDate"]');
+            const contactInput = document.getElementById('Patient_ContactInfo');
+            const nameValidationSpan = document.querySelector('span[data-valmsg-for="Patient.Name"]');
+            const contactValidationSpan = document.querySelector('span[data-valmsg-for="Patient.ContactInfo"]');
 
             // Removed local validateDob and validateLastVisit functions
 
@@ -118,16 +126,26 @@
                 lastVisitInput.addEventListener('blur', () => validateLastVisitNotFuture(lastVisitInput, lastVisitValidationSpan, prefix));
             }
 
-            // Get input elements and validation spans
-            const nameInput = document.getElementById('Patient_Name');
-            const contactInput = document.getElementById('Patient_ContactInfo');
-            const nameValidationSpan = document.querySelector('span[data-valmsg-for="Patient.Name"]');
-            const contactValidationSpan = document.querySelector('span[data-valmsg-for="Patient.ContactInfo"]');
+            // Function to update submit button state
+            function updateSubmitButtonState() {
+                if (!submitButton || !patientForm) return;
+                const isValid = isFormClientSideValid(patientForm);
+                submitButton.disabled = !isValid;
+            }
 
             // Validation handlers
-            const nameRequiredHandler = () => validateRequiredField(nameInput, nameValidationSpan, 'Name');
-            const contactRequiredHandler = () => validateRequiredField(contactInput, contactValidationSpan, 'Contact Info');
-            const contactFormatHandler = () => validateBasicContactFormat(contactInput, contactValidationSpan);
+            const nameRequiredHandler = () => {
+                validateRequiredField(nameInput, nameValidationSpan, 'Name');
+                updateSubmitButtonState(); // Update button state after validation
+            };
+            const contactRequiredHandler = () => {
+                validateRequiredField(contactInput, contactValidationSpan, 'Contact Info');
+                // Don't update button state here directly, combined handler will do it
+            };
+            const contactFormatHandler = () => {
+                validateBasicContactFormat(contactInput, contactValidationSpan);
+                // Don't update button state here directly, combined handler will do it
+            };
 
             // Add listeners
             if (nameInput) {
@@ -138,6 +156,7 @@
                 const combinedContactHandler = () => {
                     contactRequiredHandler();
                     contactFormatHandler();
+                    updateSubmitButtonState(); // Update button state after combined validation
                 };
                 contactInput.addEventListener('blur', combinedContactHandler);
                 contactInput.addEventListener('input', debounce(combinedContactHandler, 500));
@@ -147,6 +166,7 @@
             nameRequiredHandler();
             contactRequiredHandler();
             contactFormatHandler();
+            updateSubmitButtonState(); // Set initial button state
         });
     </script>
 }
