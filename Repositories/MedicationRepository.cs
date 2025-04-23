@@ -91,4 +91,22 @@ public class MedicationRepository : IMedicationRepository
     {
         return await _context.Medications.AnyAsync(e => e.Id == id);
     }
+
+    // Implementation for the new interface method
+    public async Task<bool> IsNameUniqueAsync(string name, int? currentId = null)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return true; // Or false, depending on whether an empty name is allowed/unique
+        }
+
+        var normalizedName = name.Trim().ToLower();
+
+        bool exists = await _context.Medications
+            .Where(m => m.Name != null && m.Name.ToLower() == normalizedName)
+            .Where(m => currentId == null || m.Id != currentId.Value) // Exclude current item if ID is provided
+            .AnyAsync();
+
+        return !exists; // True if no conflicting record exists
+    }
 } 

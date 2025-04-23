@@ -13,5 +13,7 @@ public interface IPatientRepository
     Task<bool> UpdateAsync(Patient patient);
     Task<bool> DeleteAsync(int id);
     Task<bool> ExistsAsync(int id);
+    Task<bool> IsContactInfoUniqueAsync(string contactInfo, int? currentId = null);
+    Task<bool> IsNameUniqueAsync(string name, int? currentId = null);
     // Add any patient-specific methods here later if needed (e.g., FindByNameAsync)
 } 

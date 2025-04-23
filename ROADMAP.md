@@ -65,7 +65,7 @@ This document outlines the planned development phases and features for the Rosht
             *   **Phase B.2: Input Formatting & Masking:** Implement client-side format checks (Regex/basic patterns) and input masking libraries for UX (e.g., Phone, License Number, Numeric fields). (Completed)
             *   **Phase B.3: Client-Side Cross-Field Validation:** Mirror relevant server-side cross-field rules (like date comparisons) in JavaScript. (Completed)
             *   **Phase B.4: Real-time Feedback Enhancements:** Explore debounced 'input' event validation and dynamic submit button state. (Completed)
-            *   **Phase B.5: Advanced Considerations:** Explore real-time uniqueness checks (AJAX) and potential integration with validation libraries if needed.
+            *   **Phase B.5: Advanced Considerations:** Explore real-time uniqueness checks (AJAX) and potential integration with validation libraries if needed. (Completed AJAX checks for Medication Name, Patient ContactInfo, Patient Name)
 4.  **User Experience:**
     *   Improve UI/UX.
     *   Add user feedback.

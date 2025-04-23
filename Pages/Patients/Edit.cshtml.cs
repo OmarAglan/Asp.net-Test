@@ -44,6 +44,28 @@ namespace Roshta.Pages_Patients
         // For more details, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            // Robustness check: Server-side uniqueness validation
+            if (Patient != null)
+            {
+                if (!string.IsNullOrWhiteSpace(Patient.ContactInfo))
+                {
+                    // Pass the current patient's ID to exclude it from the check
+                    bool isContactUnique = await _patientService.IsContactInfoUniqueAsync(Patient.ContactInfo, Patient.Id);
+                    if (!isContactUnique)
+                    {
+                        ModelState.AddModelError("Patient.ContactInfo", "Contact Info already exists.");
+                    }
+                }
+                if (!string.IsNullOrWhiteSpace(Patient.Name))
+                {
+                     bool isNameUnique = await _patientService.IsNameUniqueAsync(Patient.Name, Patient.Id);
+                     if (!isNameUnique)
+                     {
+                         ModelState.AddModelError("Patient.Name", "Patient Name already exists.");
+                     }
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();
@@ -72,5 +94,32 @@ namespace Roshta.Pages_Patients
         {
              return await _patientService.PatientExistsAsync(id);
         }
+
+        // --- Handler for ContactInfo AJAX Uniqueness Check ---
+        public async Task<IActionResult> OnGetCheckContactInfoUniqueAsync(string contactInfo, int currentId)
+        {
+            // currentId is passed from the client-side JS for the item being edited
+            if (string.IsNullOrWhiteSpace(contactInfo))
+            {
+                return new JsonResult(new { isUnique = true });
+            }
+            // Pass the currentId to the service check
+            bool isUnique = await _patientService.IsContactInfoUniqueAsync(contactInfo.Trim(), currentId);
+            return new JsonResult(new { isUnique });
+        }
+        // --------------------------------------------------
+
+        // --- Handler for Name AJAX Uniqueness Check ---
+        public async Task<IActionResult> OnGetCheckNameUniqueAsync(string name, int currentId)
+        {
+            // currentId is passed from the client-side JS for the item being edited
+             if (string.IsNullOrWhiteSpace(name))
+            {
+                return new JsonResult(new { isUnique = true });
+            }
+            bool isUnique = await _patientService.IsNameUniqueAsync(name.Trim(), currentId);
+            return new JsonResult(new { isUnique });
+        }
+        // --------------------------------------------
     }
 }

@@ -52,4 +52,17 @@ public class PatientService : IPatientService
     {
         return await _patientRepository.ExistsAsync(id);
     }
+
+    // Implementation for the new interface method
+    public async Task<bool> IsContactInfoUniqueAsync(string contactInfo, int? currentId = null)
+    {
+        // Could add validation here to check format before hitting repo?
+        return await _patientRepository.IsContactInfoUniqueAsync(contactInfo, currentId);
+    }
+
+    // Implementation for Name uniqueness
+    public async Task<bool> IsNameUniqueAsync(string name, int? currentId = null)
+    {
+        return await _patientRepository.IsNameUniqueAsync(name, currentId);
+    }
 } 

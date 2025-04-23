@@ -31,6 +31,27 @@ namespace Roshta.Pages_Patients
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            // Robustness check: Server-side uniqueness validation
+            if (Patient != null)
+            {
+                if (!string.IsNullOrWhiteSpace(Patient.ContactInfo))
+                {
+                    bool isContactUnique = await _patientService.IsContactInfoUniqueAsync(Patient.ContactInfo);
+                    if (!isContactUnique)
+                    {
+                        ModelState.AddModelError("Patient.ContactInfo", "Contact Info already exists.");
+                    }
+                }
+                if (!string.IsNullOrWhiteSpace(Patient.Name))
+                {
+                    bool isNameUnique = await _patientService.IsNameUniqueAsync(Patient.Name);
+                    if (!isNameUnique)
+                    {
+                        ModelState.AddModelError("Patient.Name", "Patient Name already exists.");
+                    }
+                }
+            }
+
             if (!ModelState.IsValid || Patient == null)
             {
                 return Page();
@@ -40,5 +61,29 @@ namespace Roshta.Pages_Patients
 
             return RedirectToPage("./Index");
         }
+
+        // --- Handler for ContactInfo AJAX Uniqueness Check ---
+        public async Task<IActionResult> OnGetCheckContactInfoUniqueAsync(string contactInfo)
+        {
+            if (string.IsNullOrWhiteSpace(contactInfo))
+            {
+                return new JsonResult(new { isUnique = true });
+            }
+            bool isUnique = await _patientService.IsContactInfoUniqueAsync(contactInfo.Trim());
+            return new JsonResult(new { isUnique });
+        }
+        // --------------------------------------------------
+
+        // --- Handler for Name AJAX Uniqueness Check ---
+        public async Task<IActionResult> OnGetCheckNameUniqueAsync(string name)
+        {
+             if (string.IsNullOrWhiteSpace(name))
+            {
+                return new JsonResult(new { isUnique = true });
+            }
+            bool isUnique = await _patientService.IsNameUniqueAsync(name.Trim());
+            return new JsonResult(new { isUnique });
+        }
+        // --------------------------------------------
     }
 }

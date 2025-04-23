@@ -44,6 +44,14 @@ namespace Roshta.Pages_Medications
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            // Optional: Add server-side uniqueness check here too for robustness
+            // Pass the current medication's ID to exclude it from the check
+            bool isUnique = await _medicationService.IsNameUniqueAsync(Medication.Name, Medication.Id);
+            if (!isUnique)
+            {
+                ModelState.AddModelError("Medication.Name", "Medication name already exists.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();
@@ -55,7 +63,7 @@ namespace Roshta.Pages_Medications
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await MedicationExistsAsync(Medication.Id))
+                if (!await MedicationExistsAsync(Medication.Id)) // Keep existing concurrency check
                 {
                     return NotFound();
                 }
@@ -70,7 +78,24 @@ namespace Roshta.Pages_Medications
 
         private async Task<bool> MedicationExistsAsync(int id)
         {
+            // Should ideally use the service if it provides ExistsAsync
             return await _medicationService.MedicationExistsAsync(id);
         }
+
+        // --- New Handler for AJAX Uniqueness Check ---
+        public async Task<IActionResult> OnGetCheckMedicationNameUniqueAsync(string name, int currentId)
+        {
+            // currentId is passed from the client-side JS for the item being edited
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return new JsonResult(new { isUnique = true });
+            }
+
+            // Pass the currentId to the service check
+            bool isUnique = await _medicationService.IsNameUniqueAsync(name.Trim(), currentId);
+
+            return new JsonResult(new { isUnique });
+        }
+        // --------------------------------------------
     }
 }

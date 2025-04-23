@@ -13,4 +13,5 @@ public interface IMedicationRepository
     Task<bool> UpdateAsync(Medication medication);
     Task<bool> DeleteAsync(int id);
     Task<bool> ExistsAsync(int id); // Useful helper method
+    Task<bool> IsNameUniqueAsync(string name, int? currentId = null);
 } 

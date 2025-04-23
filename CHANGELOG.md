@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.9.8.9] - 2024-05-05
+
+### Added
+
+*   Implemented real-time AJAX uniqueness checks for Patient Name field on `Pages/Patients/Create.cshtml` and `Pages/Patients/Edit.cshtml`.
+*   Added `IsNameUniqueAsync` method to `IPatientRepository`/`PatientRepository` and `IPatientService`/`PatientService`.
+*   Added `setupPatientNameUniquenessCheck` function to `wwwroot/js/validation-helpers.js`.
+*   Implemented real-time AJAX uniqueness check for Medication Name field on `Pages/Medications/Create.cshtml` and `Pages/Medications/Edit.cshtml`.
+*   Added `IsNameUniqueAsync` method to `IMedicationRepository`/`MedicationRepository` and `IMedicationService`/`MedicationService`.
+*   Added `setupMedicationNameUniquenessCheck` function to `wwwroot/js/validation-helpers.js`.
+*   Implemented real-time AJAX uniqueness check for Patient ContactInfo field on `Pages/Patients/Create.cshtml` and `Pages/Patients/Edit.cshtml`.
+*   Added `IsContactInfoUniqueAsync` method to `IPatientRepository`/`PatientRepository` and `IPatientService`/`PatientService`.
+*   Added `setupPatientContactInfoUniquenessCheck` function to `wwwroot/js/validation-helpers.js`.
+
+### Changed
+
+*   Updated `Pages/Patients/Create.cshtml` and `Pages/Patients/Edit.cshtml` to call `setupPatientNameUniquenessCheck` for real-time validation.
+*   Updated `Pages/Patients/Create.cshtml` and `Pages/Patients/Edit.cshtml` to call `setupPatientContactInfoUniquenessCheck` for real-time validation.
+*   Updated `Pages/Medications/Create.cshtml` and `Pages/Medications/Edit.cshtml` to call `setupMedicationNameUniquenessCheck` for real-time validation.
+*   Updated `ROADMAP.md` to mark Phase B.5 (real-time uniqueness checks) as completed for Medication Name, Patient ContactInfo, and Patient Name.
+*   Updated `README.md` to reflect the new version number and added features.
+
 ## [0.9.8.2] - YYYY-MM-DD
 
 ### Added

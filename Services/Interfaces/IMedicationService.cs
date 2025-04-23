@@ -13,4 +13,5 @@ public interface IMedicationService
     Task<Medication?> UpdateMedicationAsync(Medication medication);
     Task<bool> DeleteMedicationAsync(int id);
     Task<bool> MedicationExistsAsync(int id);
+    Task<bool> IsNameUniqueAsync(string name, int? currentId = null);
 } 

@@ -252,15 +252,14 @@ function validateBasicContactFormat(inputElement, validationSpan) {
             }
         }
     } else {
-        // If the field is empty, clear the format error message if it's there
+        // If the field is empty, clear the format error message
         if (validationSpan.textContent === formatErrorMessage) {
             validationSpan.textContent = '';
         }
-        // If the field is empty and no other message exists, remove invalid class
-        // This might be handled by the required field validator too, but ensures cleanup
-        if (!validationSpan.textContent) { 
+        // Only remove 'is-invalid' if no other validation message exists
+        if (!validationSpan.textContent) {
             inputElement.classList.remove('is-invalid');
-         }
+        }
     }
 }
 
@@ -434,4 +433,183 @@ function isFormClientSideValid(formElement) {
     }
 
     return true; // No errors found
+}
+
+/**
+ * Sets up real-time uniqueness check for the medication name input field via AJAX.
+ * Assumes input has id="Medication_Name" and a validation message span exists
+ * (e.g., <span data-valmsg-for="Medication.Name"></span>).
+ * @param {string} checkUrl The base URL to the Page Handler (e.g., '/Medications/Create')
+ *                          The handler name 'CheckMedicationNameUnique' will be appended.
+ * @param {number|null} [currentId=null] The ID of the item being edited, to exclude it from the check. Pass null for create.
+ */
+function setupMedicationNameUniquenessCheck(checkUrl, currentId = null) {
+    const nameInput = document.getElementById('Medication_Name');
+    // Find the validation message placeholder associated with the Name input
+    const validationSpan = document.querySelector('span[data-valmsg-for="Medication.Name"]');
+
+    if (!nameInput || !validationSpan) {
+        console.warn('Medication name input or validation span not found for uniqueness check.');
+        return;
+    }
+
+    const uniquenessErrorMessage = 'Medication name already exists.';
+    let debounceTimer; // For debouncing input checks (optional, using blur for now)
+
+    nameInput.addEventListener('blur', async function() { // Using 'blur' for simplicity, could use debounced 'input'
+        const name = nameInput.value.trim();
+
+        // Clear previous uniqueness error first
+        if (validationSpan.textContent === uniquenessErrorMessage) {
+            validationSpan.textContent = '';
+             // Only remove is-invalid if no other validation message exists
+            if (!validationSpan.textContent) {
+                 nameInput.classList.remove('is-invalid');
+            }
+        }
+
+        if (!name) {
+            // Don't check empty strings, let 'Required' validator handle it
+            return;
+        }
+
+        try {
+            // Include currentId in the query if provided (for edit checks)
+            const idQueryParam = currentId !== null ? `&currentId=${currentId}` : '';
+            const handlerUrl = `${checkUrl}?handler=CheckMedicationNameUnique&name=${encodeURIComponent(name)}${idQueryParam}`;
+            const response = await fetch(handlerUrl);
+
+            if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+
+            if (!result.isUnique) {
+                validationSpan.textContent = uniquenessErrorMessage;
+                nameInput.classList.add('is-invalid');
+            }
+            // If it is unique, we've already cleared the message above.
+
+        } catch (error) {
+            console.error('Error checking medication name uniqueness:', error);
+            // Optionally display a generic error message to the user
+            // validationSpan.textContent = 'Error checking uniqueness.';
+            // nameInput.classList.add('is-invalid');
+        }
+    });
+}
+
+/**
+ * Sets up real-time uniqueness check for the patient contact info input field via AJAX.
+ * Assumes input has id="Patient_ContactInfo" and a validation message span exists
+ * (e.g., <span data-valmsg-for="Patient.ContactInfo"></span>).
+ * @param {string} checkUrl The base URL to the Page Handler (e.g., '/Patients/Create')
+ *                          The handler name 'CheckContactInfoUnique' will be appended.
+ * @param {number|null} [currentId=null] The ID of the item being edited, to exclude it from the check. Pass null for create.
+ */
+function setupPatientContactInfoUniquenessCheck(checkUrl, currentId = null) {
+    const contactInput = document.getElementById('Patient_ContactInfo');
+    const validationSpan = document.querySelector('span[data-valmsg-for="Patient.ContactInfo"]');
+
+    if (!contactInput || !validationSpan) {
+        console.warn('Patient contact info input or validation span not found for uniqueness check.');
+        return;
+    }
+
+    const uniquenessErrorMessage = 'Contact Info already exists.';
+
+    contactInput.addEventListener('blur', async function() { 
+        const contactInfo = contactInput.value.trim();
+
+        // Clear previous uniqueness error first
+        if (validationSpan.textContent === uniquenessErrorMessage) {
+            validationSpan.textContent = '';
+            if (!validationSpan.textContent) { // Remove class only if no other errors
+                contactInput.classList.remove('is-invalid');
+            }
+        }
+
+        if (!contactInfo) {
+            return; // Don't check empty strings
+        }
+
+        try {
+            const idQueryParam = currentId !== null ? `&currentId=${currentId}` : '';
+            // Use the correct handler name
+            const handlerUrl = `${checkUrl}?handler=CheckContactInfoUnique&contactInfo=${encodeURIComponent(contactInfo)}${idQueryParam}`;
+            const response = await fetch(handlerUrl);
+
+            if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+
+            if (!result.isUnique) {
+                validationSpan.textContent = uniquenessErrorMessage;
+                contactInput.classList.add('is-invalid');
+            }
+
+        } catch (error) {
+            console.error('Error checking patient contact info uniqueness:', error);
+        }
+    });
+}
+
+/**
+ * Sets up real-time uniqueness check for the patient name input field via AJAX.
+ * Assumes input has id="Patient_Name" and a validation message span exists
+ * (e.g., <span data-valmsg-for="Patient.Name"></span>).
+ * @param {string} checkUrl The base URL to the Page Handler (e.g., '/Patients/Create')
+ *                          The handler name 'CheckNameUnique' will be appended.
+ * @param {number|null} [currentId=null] The ID of the item being edited, to exclude it from the check. Pass null for create.
+ */
+function setupPatientNameUniquenessCheck(checkUrl, currentId = null) {
+    const nameInput = document.getElementById('Patient_Name');
+    const validationSpan = document.querySelector('span[data-valmsg-for="Patient.Name"]');
+
+    if (!nameInput || !validationSpan) {
+        console.warn('Patient name input or validation span not found for uniqueness check.');
+        return;
+    }
+
+    const uniquenessErrorMessage = 'Patient Name already exists.';
+
+    nameInput.addEventListener('blur', async function() { 
+        const name = nameInput.value.trim();
+
+        // Clear previous uniqueness error first
+        if (validationSpan.textContent === uniquenessErrorMessage) {
+            validationSpan.textContent = '';
+            if (!validationSpan.textContent) { // Remove class only if no other errors
+                nameInput.classList.remove('is-invalid');
+            }
+        }
+
+        if (!name) {
+            return; // Don't check empty strings
+        }
+
+        try {
+            const idQueryParam = currentId !== null ? `&currentId=${currentId}` : '';
+            // Use the correct handler name
+            const handlerUrl = `${checkUrl}?handler=CheckNameUnique&name=${encodeURIComponent(name)}${idQueryParam}`;
+            const response = await fetch(handlerUrl);
+
+            if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+
+            if (!result.isUnique) {
+                validationSpan.textContent = uniquenessErrorMessage;
+                nameInput.classList.add('is-invalid');
+            }
+
+        } catch (error) {
+            console.error('Error checking patient name uniqueness:', error);
+        }
+    });
 } 

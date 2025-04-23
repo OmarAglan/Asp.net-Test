@@ -51,4 +51,10 @@ public class MedicationService : IMedicationService
     {
         return await _medicationRepository.ExistsAsync(id);
     }
+
+    // Implementation for the new interface method
+    public async Task<bool> IsNameUniqueAsync(string name, int? currentId = null)
+    {
+        return await _medicationRepository.IsNameUniqueAsync(name, currentId);
+    }
 } 

@@ -95,4 +95,43 @@ public class PatientRepository : IPatientRepository
     {
         return await _context.Patients.AnyAsync(e => e.Id == id);
     }
+
+    // Implementation for the new interface method
+    public async Task<bool> IsContactInfoUniqueAsync(string contactInfo, int? currentId = null)
+    {
+        if (string.IsNullOrWhiteSpace(contactInfo))
+        {
+            // Consider empty/whitespace contact info as non-unique or handle based on requirements
+            // If ContactInfo is nullable or not required, empty might be considered "unique"
+            return true; 
+        }
+
+        // Normalize for case-insensitive comparison
+        var normalizedContact = contactInfo.Trim().ToLower();
+
+        bool exists = await _context.Patients
+            .Where(p => p.ContactInfo != null && p.ContactInfo.ToLower() == normalizedContact)
+            .Where(p => currentId == null || p.Id != currentId.Value) // Exclude current item if ID provided
+            .AnyAsync();
+
+        return !exists; // True if no conflicting record exists
+    }
+
+    // Implementation for Name uniqueness
+    public async Task<bool> IsNameUniqueAsync(string name, int? currentId = null)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return true; // Consider empty name unique or handle based on requirements
+        }
+
+        var normalizedName = name.Trim().ToLower();
+
+        bool exists = await _context.Patients
+            .Where(p => p.Name != null && p.Name.ToLower() == normalizedName)
+            .Where(p => currentId == null || p.Id != currentId.Value) 
+            .AnyAsync();
+
+        return !exists; 
+    }
 } 

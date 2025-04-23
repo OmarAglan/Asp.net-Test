@@ -13,4 +13,6 @@ public interface IPatientService
     Task<Patient?> UpdatePatientAsync(Patient patient);
     Task<bool> DeletePatientAsync(int id);
     Task<bool> PatientExistsAsync(int id);
+    Task<bool> IsContactInfoUniqueAsync(string contactInfo, int? currentId = null);
+    Task<bool> IsNameUniqueAsync(string name, int? currentId = null);
 } 

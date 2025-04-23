@@ -167,6 +167,14 @@
             contactRequiredHandler();
             contactFormatHandler();
             updateSubmitButtonState(); // Set initial button state
+
+            // --- Add call for Contact Info uniqueness check (Create) ---
+            setupPatientContactInfoUniquenessCheck('/Patients/Create');
+            // ---------------------------------------------------------
+
+            // --- Add call for Name uniqueness check (Create) ---
+            setupPatientNameUniquenessCheck('/Patients/Create');
+            // ---------------------------------------------------
         });
     </script>
 }

@@ -180,6 +180,15 @@
             contactRequiredHandler(); 
             contactFormatHandler();   
             updateSubmitButtonState(); // Set initial button state
+
+            // --- Add call for Contact Info uniqueness check (Edit) ---
+            // Pass the current patient ID to exclude it from the check
+            setupPatientContactInfoUniquenessCheck('/Patients/Edit', @Model.Patient.Id);
+            // -------------------------------------------------------
+
+             // --- Add call for Name uniqueness check (Edit) ---
+            setupPatientNameUniquenessCheck('/Patients/Edit', @Model.Patient.Id);
+            // ------------------------------------------------
         });
     </script>
 }

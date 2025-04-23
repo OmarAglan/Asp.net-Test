@@ -96,6 +96,11 @@
             // Initial checks on load
             if (nameInput) nameRequiredHandler();
             updateSubmitButtonState(); // Set initial button state
+
+            // --- Add call for uniqueness check (Edit version) ---
+            // Pass the current medication ID to exclude it from the check
+            setupMedicationNameUniquenessCheck('/Medications/Edit', @Model.Medication.Id); 
+            // ----------------------------------------------------
         });
     </script>
 }

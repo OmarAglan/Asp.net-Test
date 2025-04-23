@@ -90,6 +90,13 @@
             // Initial checks on load
             if (nameInput) nameRequiredHandler();
             updateSubmitButtonState(); // Set initial button state
+
+            // --- Add call for uniqueness check ---
+            setupMedicationNameUniquenessCheck('/Medications/Create'); 
+            // Note: The uniqueness check itself will also update the button state indirectly 
+            // by adding/removing 'is-invalid' class, which isFormClientSideValid checks.
+            // If more direct control is needed, the uniqueness check could also call updateSubmitButtonState.
+            // ---------------------------------------
         });
     </script>
 }
