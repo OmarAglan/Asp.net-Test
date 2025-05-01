@@ -8,6 +8,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Roshta</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Add reference to Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Add reference to Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" /> <!-- Optional: Bootstrap 5 theme for Select2 -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Roshta.styles.css" asp-append-version="true" />
 </head>
@@ -23,11 +28,9 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Dashboard</a> @* Changed text and target is already Index *@
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
+                        @* Removed Privacy Link *@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Medications/Index">Medications</a>
                         </li>
@@ -37,16 +40,8 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Prescriptions/Index">Prescriptions</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Prescriptions/Create">New Prescription</a>
-                        </li>
-                        
-                        @if (LicenseService.IsActivated() && LicenseService.IsProfileSetup())
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/DoctorProfile/Edit">Edit Profile</a>
-                            </li>
-                        }
+                        @* Removed New Prescription Link *@
+                        @* Removed Edit Profile Link *@
                     </ul>
                 </div>
             </div>
@@ -60,7 +55,8 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2024 - Roshta - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            &copy; @DateTime.Now.Year - Roshta 
+            @* Removed Privacy Link from footer *@
         </div>
     </footer>
 
@@ -69,6 +65,8 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://unpkg.com/imask"></script>
     <script src="~/js/validation-helpers.js" asp-append-version="true"></script>
+    <!-- Add reference to Select2 JS (after jQuery and Bootstrap Bundle) -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> @* Corrected tag back to script *@
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

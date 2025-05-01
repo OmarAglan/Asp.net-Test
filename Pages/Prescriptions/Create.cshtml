@@ -208,11 +208,40 @@
             const expiryDateValidationSpan = document.querySelector('span[data-valmsg-for="PrescriptionCreate.ExpiryDate"]');
             const nextAppointmentDateValidationSpan = document.querySelector('span[data-valmsg-for="PrescriptionCreate.NextAppointmentDate"]');
 
+            // Initialize Select2
+            // Ensure jQuery is loaded before this script runs (it is in _Layout.cshtml)
+            if (jQuery && jQuery.fn.select2) {
+                 $('#PrescriptionCreate_PatientId').select2({
+                     theme: 'bootstrap-5',
+                     placeholder: '-- Select Patient --',
+                     allowClear: true // Optional: Adds a clear button
+                 });
+                 $('#selectMedication').select2({
+                     theme: 'bootstrap-5',
+                     placeholder: '-- Select Medication --',
+                     allowClear: true // Optional: Adds a clear button
+                 });
+
+                 // Handle Select2 validation integration (clearing errors on change)
+                 $('#PrescriptionCreate_PatientId').on('change', function() {
+                     validatePatientSelected(); // Re-validate on change
+                 });
+                 $('#selectMedication').on('change', function() {
+                     // Clear validation state for medication selection if needed
+                     if (selectMedication.classList.contains('is-invalid')) {
+                         selectMedication.classList.remove('is-invalid');
+                         // Clear any associated error message span if you add one
+                     }
+                 });
+            } else {
+                console.error("jQuery or Select2 not loaded correctly.");
+            }
+
             // Initialize index based on server-rendered hidden fields
             let initialItemCount = prescriptionForm.querySelectorAll('input[type="hidden"][name^="PrescriptionCreate.Items"][name$="MedicationId"]').length;
             let itemIndex = initialItemCount;
 
-            // --- Validation Handlers for Add Item section --- 
+            // --- Validation Handlers for Add Item section ---
             const validateDosage = () => validateRequiredField(inputDosage, dosageValidationSpan, 'Dosage');
             const validateFrequency = () => validateRequiredField(inputFrequency, frequencyValidationSpan, 'Frequency');
             const validateDuration = () => validateRequiredField(inputDuration, durationValidationSpan, 'Duration');
@@ -221,10 +250,11 @@
             const validateRefillsFormat = () => validateNonNegativeInteger(inputRefills, refillsValidationSpan, 'Refills');
             // Add handler for Instructions required validation
 
-            // Combined handlers
+            // Combined handlers - Ensure it returns a boolean
             const combinedQuantityHandler = () => {
-                validateQuantityRequired();
-                validateQuantityFormat();
+                const isReqValid = validateRequiredField(inputQuantity, quantityValidationSpan, 'Quantity');
+                const isFmtValid = validatePositiveNumber(inputQuantity, quantityValidationSpan, 'Quantity');
+                return isReqValid && isFmtValid; // Return combined result
             };
 
             // --- Attach Listeners to Add Item fields ---
@@ -359,36 +389,54 @@
                 const refills = inputRefills.value; // Optional, default?
                 const notes = inputNotes.value; // Optional
 
-                // --- Trigger validation before adding --- 
-                let isValid = true;
-                if (!medicationId) { 
-                    /* Handle medication selection error - maybe add a span */ 
+                // --- Trigger validation before adding ---
+                // Reset validity flag
+                let isItemValid = true; 
+
+                // Validate Medication Selection
+                if (!medicationId) {
                     selectMedication.classList.add('is-invalid');
-                    isValid = false; 
+                    // Optionally add a validation message span for medication selection
+                    isItemValid = false;
                 } else {
                     selectMedication.classList.remove('is-invalid');
+                    // Clear any specific medication selection error message span here
                 }
 
-                if (!validateDosage()) isValid = false; // validateRequiredField returns boolean
-                if (!validateFrequency()) isValid = false;
-                if (!validateDuration()) isValid = false;
-                if (!combinedQuantityHandler()) isValid = false; // Run combined check
-                if (!validateRefillsFormat()) isValid = false; // Check refills format (optional field)
-                
-                // Add required validation for Instructions
-                // if (!validateInstructionsRequired()) isValid = false;
-                if (!instructions) { 
-                     /* Handle instructions required error - maybe add a span */ 
-                     inputInstructions.classList.add('is-invalid');
-                     isValid = false; 
+                // Validate other fields using helper functions and aggregate results, logging detailed results
+                let dosageValid = validateRequiredField(inputDosage, dosageValidationSpan, 'Dosage');
+                console.log(`Dosage valid: ${dosageValid}`);
+                if (!dosageValid) isItemValid = false;
+
+                let frequencyValid = validateRequiredField(inputFrequency, frequencyValidationSpan, 'Frequency');
+                console.log(`Frequency valid: ${frequencyValid}`);
+                if (!frequencyValid) isItemValid = false;
+
+                let durationValid = validateRequiredField(inputDuration, durationValidationSpan, 'Duration');
+                console.log(`Duration valid: ${durationValid}`);
+                if (!durationValid) isItemValid = false;
+
+                let quantityValid = combinedQuantityHandler(); // Use the updated handler
+                console.log(`Quantity valid: ${quantityValid}`);
+                if (!quantityValid) isItemValid = false;
+
+                let refillsValid = validateNonNegativeInteger(inputRefills, refillsValidationSpan, 'Refills'); // Check format even if optional
+                console.log(`Refills format valid: ${refillsValid}`);
+                if (!refillsValid) isItemValid = false;
+
+                // Validate Instructions (Required)
+                let instructionsValid = validateRequiredField(inputInstructions, null, 'Instructions'); // Pass null for span if none exists, just use class
+                console.log(`Instructions valid: ${instructionsValid}`);
+                if (!instructionsValid) {
+                    inputInstructions.classList.add('is-invalid'); // Manually add class if no span
+                    isItemValid = false;
                 } else {
-                    inputInstructions.classList.remove('is-invalid');
+                     inputInstructions.classList.remove('is-invalid');
                 }
-                
 
-                if (!isValid) {
-                    // Maybe show a general message or rely on individual field highlights
-                    console.log("Add item validation failed");
+                console.log(`Overall item validity before check: ${isItemValid}`);
+                if (!isItemValid) {
+                    console.log("Add item validation failed overall. Check individual field logs and highlighted fields.");
                     return; // Stop if validation fails
                 }
 
@@ -420,10 +468,10 @@
                     <td>${instructions}</td>
                     <td>${refills || 0}</td>
                     <td>${notes}</td>
-                    <td><button type="button" class="btn btn-danger btn-sm btn-remove-item">Remove</button></td>
+                    <td><button type="button" class="btn btn-outline-danger btn-sm btn-remove-item" title="Remove Item"><i class="bi bi-trash"></i></button></td>
                 `;
 
-                 // --- Add hidden fields --- 
+                 // --- Add hidden fields ---
                 const baseName = `PrescriptionCreate.Items[${itemIndex}]`;
                 addHiddenInput(`${baseName}.MedicationId`, medicationId);
                 addHiddenInput(`${baseName}.Dosage`, dosage);
@@ -551,4 +599,4 @@
             updateMainSubmitButtonState(); // Final overall check
         });
     </script>
-} 
+}

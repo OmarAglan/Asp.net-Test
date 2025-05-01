@@ -57,4 +57,18 @@ public class MedicationService : IMedicationService
     {
         return await _medicationRepository.IsNameUniqueAsync(name, currentId);
     }
-} 
+
+    // --- Implementation for Pagination Methods ---
+
+    public async Task<List<Medication>> GetMedicationsPagedAsync(int pageNumber, int pageSize, string? searchTerm = null, string? sortOrder = null)
+    {
+        return await _medicationRepository.GetPagedAsync(pageNumber, pageSize, searchTerm, sortOrder);
+    }
+
+    public async Task<int> GetMedicationsCountAsync(string? searchTerm = null)
+    {
+        return await _medicationRepository.GetCountAsync(searchTerm);
+    }
+
+    // ---------------------------------------------
+}

@@ -136,25 +136,34 @@ function validatePhoneNumberFormat(inputElement, validationSpan) {
  * @param {HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement} inputElement The input element.
  * @param {HTMLElement} validationSpan The span element to display validation messages.
  * @param {string} [fieldName='Field'] Name of the field for the error message.
+ * @returns {boolean} True if the field is valid (not empty), false otherwise.
  */
 function validateRequiredField(inputElement, validationSpan, fieldName = 'Field') {
-    if (!inputElement || !validationSpan) return;
+    if (!inputElement) return false; // Cannot validate without an input element
+
     const value = inputElement.value.trim();
     const requiredMessage = `${fieldName} is required.`;
+    let isValid = true;
 
     if (!value) {
-        validationSpan.textContent = requiredMessage;
+        // If a span exists, update it
+        if (validationSpan) {
+            validationSpan.textContent = requiredMessage;
+        }
         inputElement.classList.add('is-invalid');
+        isValid = false;
     } else {
-        // Only clear the error if it's the required field message
-        if (validationSpan.textContent === requiredMessage) {
+        // If a span exists and shows the required message, clear it
+        if (validationSpan && validationSpan.textContent === requiredMessage) {
             validationSpan.textContent = '';
         }
-         // Only remove is-invalid if no other validation message exists
-        if (!validationSpan.textContent) {
+        // Only remove 'is-invalid' if no other validation message exists (check span if available)
+        if (!validationSpan || !validationSpan.textContent) {
             inputElement.classList.remove('is-invalid');
         }
+        isValid = true;
     }
+    return isValid; // Return the validity status
 }
 
 /**
@@ -612,4 +621,4 @@ function setupPatientNameUniquenessCheck(checkUrl, currentId = null) {
             console.error('Error checking patient name uniqueness:', error);
         }
     });
-} 
+}

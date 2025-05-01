@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.9.9.0] - 2025-05-01
+
+### Added
+*   Implemented server-side pagination for Patients, Medications, and Prescriptions index pages.
+*   Implemented server-side sorting (by Name/Date) for Patients, Medications, and Prescriptions index pages.
+*   Added Bootstrap Icons CDN link to `_Layout.cshtml`.
+*   Added Select2 library (CDN) for enhanced dropdowns.
+*   Initialized Select2 on Patient and Medication dropdowns in `Pages/Prescriptions/Create.cshtml`.
+*   Added seed data for Doctor, Patients, and Medications via `ApplicationDbContext.OnModelCreating`.
+*   Created `AddSeedData` database migration.
+*   Transformed `Pages/Index.cshtml` into a dashboard displaying entity counts and quick action links.
+
+### Changed
+*   Updated Patients, Medications, and Prescriptions repositories and services to support pagination and sorting.
+*   Updated Patients, Medications, and Prescriptions index page models (`.cshtml.cs`) to handle pagination and sorting logic.
+*   Updated Patients, Medications, and Prescriptions index views (`.cshtml`) to include pagination controls and sortable column headers.
+*   Replaced text action links with icon buttons on Patients, Medications, and Prescriptions index pages.
+*   Used Bootstrap Badges for status display on Patients and Prescriptions index pages.
+*   Updated `validation-helpers.js` (`validateRequiredField`) to correctly handle missing validation spans and return boolean validity.
+*   Refined client-side validation logic in `Pages/Prescriptions/Create.cshtml` for adding items.
+*   Simplified header navigation in `_Layout.cshtml` (removed Privacy, New Prescription, Edit Profile links).
+*   Moved "New Prescription" and conditional "Edit Profile" buttons to the Dashboard page (`Pages/Index.cshtml`).
+*   Updated `README.md` and `ROADMAP.md` to reflect completed UI/UX enhancements.
+
+### Fixed
+*   Fixed Bootstrap Icons not appearing due to missing CSS link.
+*   Fixed client-side validation issue preventing adding items in `Pages/Prescriptions/Create.cshtml`.
+*   Corrected `Doctor.Specialization` property name in seed data.
+*   Corrected `<script>` tag for Select2 JS in `_Layout.cshtml`.
+
 ## [0.9.8.9] - 2024-05-05
 
 ### Added

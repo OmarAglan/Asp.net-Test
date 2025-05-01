@@ -65,4 +65,20 @@ public class PatientService : IPatientService
     {
         return await _patientRepository.IsNameUniqueAsync(name, currentId);
     }
-} 
+
+    // --- Implementation for Pagination Methods ---
+
+    public async Task<List<Patient>> GetPatientsPagedAsync(int pageNumber, int pageSize, string? searchTerm = null, string? sortOrder = null)
+    {
+        // Add any service-level logic here if needed (e.g., default page size)
+        return await _patientRepository.GetPagedAsync(pageNumber, pageSize, searchTerm, sortOrder);
+    }
+
+    public async Task<int> GetPatientsCountAsync(string? searchTerm = null)
+    {
+        // Add any service-level logic here if needed
+        return await _patientRepository.GetCountAsync(searchTerm);
+    }
+
+    // ---------------------------------------------
+}

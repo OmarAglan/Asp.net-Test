@@ -56,7 +56,7 @@ This document outlines the planned development phases and features for the Rosht
     *   Create page(s) for the licensed doctor to view/edit their own details. (Completed - via `/DoctorProfile/Edit`)
 2.  **Search & Filtering:** (Basic Implementation - Completed)
     *   Implement search/filtering for Patients, Medications, Prescriptions. (Completed basic text search)
-3.  **Validation:** (In Progress)
+3.  **Validation:** (Completed)
     *   Add robust server-side and client-side validation.
         *   Implement server-side checks for foreign key validity (e.g., ensure selected PatientId, MedicationId exist before saving). (Completed)
         *   Implement complex business rule validation (e.g., using `IValidatableObject` or custom `ValidationAttribute` for date comparisons, conditional requirements). (Completed)
@@ -65,11 +65,37 @@ This document outlines the planned development phases and features for the Rosht
             *   **Phase B.2: Input Formatting & Masking:** Implement client-side format checks (Regex/basic patterns) and input masking libraries for UX (e.g., Phone, License Number, Numeric fields). (Completed)
             *   **Phase B.3: Client-Side Cross-Field Validation:** Mirror relevant server-side cross-field rules (like date comparisons) in JavaScript. (Completed)
             *   **Phase B.4: Real-time Feedback Enhancements:** Explore debounced 'input' event validation and dynamic submit button state. (Completed)
-            *   **Phase B.5: Advanced Considerations:** Explore real-time uniqueness checks (AJAX) and potential integration with validation libraries if needed. (Completed AJAX checks for Medication Name, Patient ContactInfo, Patient Name)
+            *   **Phase B.5: Advanced Considerations:** Explore real-time uniqueness checks (AJAX) and potential integration with validation libraries if needed. (Completed AJAX checks for Medication Name, Patient ContactInfo, Patient Name) (Completed)
 4.  **User Experience:**
-    *   Improve UI/UX.
-    *   Add user feedback.
-    *   Implement live search/autocomplete with debouncing for list pages (Patients, Medications, Prescriptions).
+    *   **Improve UI/UX:** (Expand this section)
+        *   **Consistency:** 
+            *   Standardize button styles, sizes, and placements (e.g., Primary actions always left/right, consistent use of `btn-primary`, `btn-secondary`, `btn-danger`).
+            *   Ensure uniform form layout, spacing, label alignment, and input field appearance across all Create/Edit pages.
+            *   Establish consistent typography (headings, body text, labels) and vertical rhythm.
+        *   **Visual Feedback & Interaction:**
+            *   Implement subtle loading indicators (e.g., spinners next to buttons, dimming sections) during AJAX operations (uniqueness checks, live search, dynamic form updates).
+            *   Use non-intrusive notifications (e.g., Bootstrap Toasts) for success messages (Save, Create, Delete) instead of full page reloads just for messages where possible. Use clear Alerts for critical errors.
+            *   Provide immediate visual feedback for client-side validation errors (using existing `is-invalid` but ensure consistency).
+        *   **Layout & Readability:**
+            *   Review form structure on complex pages (e.g., Prescription Create). Consider using Bootstrap Cards (`<div class="card">`) to group related fields.
+            *   Optimize grid layout (`row`, `col-*`) for better alignment and spacing, especially on wider screens.
+            *   Test and refine responsiveness across common device sizes (mobile, tablet, desktop).
+        *   **Accessibility (a11y):**
+            *   Ensure all form inputs have correctly associated `<label>` tags (`asp-for` helps).
+            *   Review color contrast for text, buttons, and status indicators to meet WCAG guidelines.
+            *   Use ARIA attributes where necessary for dynamic content updates (e.g., live search results, dynamic form sections) to aid screen readers.
+        *   **Index Pages (Lists):**
+            *   Replace text links for row actions (Edit, Details, Delete) with clear icons (e.g., using Font Awesome or Bootstrap Icons) potentially with tooltips on hover. (Completed for Patients, Medications, Prescriptions)
+            *   Implement server-side pagination for potentially long lists (Patients, Medications, Prescriptions) to improve initial load time and performance. (Completed for Patients, Medications, Prescriptions)
+            *   Add client-side or server-side table sorting by clicking column headers. (Completed server-side for Patients, Medications, Prescriptions)
+            *   Use Bootstrap Badges for visually distinct status display (e.g., `PrescriptionStatus`, `Patient.IsActive`). (Completed for Patients, Prescriptions)
+        *   **Forms (Create/Edit):**
+            *   Enhance the dynamic Prescription Items list on `Prescriptions/Create.cshtml`: improve visual separation of items, make add/remove actions more intuitive (e.g., clear icons), ensure robust validation for dynamic rows. (Add/Remove working, validation improved)
+            *   For long dropdowns (`SelectList` - e.g., Patient/Medication selection), integrate a JavaScript library like `Select2` or `Tom Select` to provide type-ahead searching and filtering within the dropdown itself.
+        *   **Dashboard (`Index.cshtml`):** 
+            *   Transform the default Index page into a useful dashboard: display key stats (e.g., Active Prescriptions count), quick action links (New Prescription, New Patient), maybe a list of recent prescriptions or upcoming appointments (if applicable).
+    *   Add user feedback. // (This is largely covered by the detailed points above, perhaps remove or refine)
+    *   Implement live search/autocomplete with debouncing for list pages (Patients, Medications, Prescriptions). (In Progress)
         *   Client-side JavaScript (e.g., using `fetch` and debouncing).
         *   Server-side endpoint (e.g., named page handler or API controller returning JSON).
 5.  **Prescription Management Refinements:** (Completed)
@@ -107,4 +133,4 @@ This document outlines the planned development phases and features for the Rosht
     *   **Replace Temporary License Storage:** Implement a secure license validation and storage mechanism (e.g., using Windows DPAPI for local encrypted storage, or implementing an Online Activation server).
     *   Review security practices (e.g., input validation, protection against common web vulnerabilities).
 3.  **Code Refactoring:**
-    *   Improve code quality and maintainability. 
+    *   Improve code quality and maintainability.

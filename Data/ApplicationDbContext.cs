@@ -53,6 +53,38 @@ public class ApplicationDbContext : DbContext
             .WithMany(m => m.PrescriptionItems)
             .HasForeignKey(pi => pi.MedicationId);
 
+        // --- Seed Data ---
+        var seedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc); // Consistent seed date
+
+        modelBuilder.Entity<Doctor>().HasData(
+            new Doctor
+            {
+                Id = 1, // Explicit ID for seeding
+                Name = "Dr. Default",
+                Specialization = "General Practice", // Corrected property name
+                LicenseNumber = "0000", // Placeholder
+                ContactPhone = "01000000000",
+                ContactEmail = "dr.default@roshta.app",
+                IsSubscribed = true, // Assuming the default doctor is subscribed
+                CreatedAt = seedDate,
+                UpdatedAt = seedDate
+            }
+        );
+
+        modelBuilder.Entity<Patient>().HasData(
+            new Patient { Id = 1, Name = "Ahmed Zewail", DateOfBirth = new DateTime(1946, 2, 26), ContactInfo = "ahmed.zewail@example.com", VisitCount = 5, LastVisitDate = seedDate.AddDays(-10), HasOutstandingBalance = false, IsActive = true, CreatedAt = seedDate, UpdatedAt = seedDate },
+            new Patient { Id = 2, Name = "Naguib Mahfouz", DateOfBirth = new DateTime(1911, 12, 11), ContactInfo = "01112345678", VisitCount = 2, LastVisitDate = seedDate.AddDays(-30), HasOutstandingBalance = true, IsActive = true, CreatedAt = seedDate, UpdatedAt = seedDate },
+            new Patient { Id = 3, Name = "Umm Kulthum", DateOfBirth = new DateTime(1904, 5, 4), ContactInfo = "umm.kulthum@diva.net", VisitCount = 10, LastVisitDate = seedDate.AddDays(-5), HasOutstandingBalance = false, IsActive = false, CreatedAt = seedDate, UpdatedAt = seedDate } // Inactive patient example
+        );
+
+        modelBuilder.Entity<Medication>().HasData(
+            new Medication { Id = 1, Name = "Panadol Extra", Dosage = "500mg/65mg", Form = "Tablet", Manufacturer = "GSK", CreatedAt = seedDate, UpdatedAt = seedDate },
+            new Medication { Id = 2, Name = "Amoxicillin", Dosage = "500mg", Form = "Capsule", Manufacturer = "Generic Pharma", CreatedAt = seedDate, UpdatedAt = seedDate },
+            new Medication { Id = 3, Name = "Ventolin Inhaler", Dosage = "100mcg/puff", Form = "Inhaler", Manufacturer = "GSK", CreatedAt = seedDate, UpdatedAt = seedDate },
+            new Medication { Id = 4, Name = "Cataflam", Dosage = "50mg", Form = "Tablet", Manufacturer = "Novartis", CreatedAt = seedDate, UpdatedAt = seedDate }
+        );
+        // -----------------
+
     }
 
     // Override SaveChanges to update audit fields
@@ -108,4 +140,4 @@ public class ApplicationDbContext : DbContext
             // }
         }
     }
-} 
+}

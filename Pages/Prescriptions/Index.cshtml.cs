@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Roshta.Models;
 using Roshta.Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using System; // Added for Math.Ceiling
+using System.Collections.Generic; // Added for List<>
+using System.Linq; // Added for ToList()
+using System.Threading.Tasks; // Added for Task
 
 namespace Roshta.Pages.Prescriptions;
 
@@ -10,6 +14,7 @@ public class IndexModel : PageModel
 {
     private readonly IPrescriptionService _prescriptionService;
     private readonly ILogger<IndexModel> _logger;
+    private const int PageSize = 10; // Define page size
 
     public IndexModel(IPrescriptionService prescriptionService, ILogger<IndexModel> logger)
     {
@@ -17,24 +22,55 @@ public class IndexModel : PageModel
         _logger = logger;
     }
 
-    public IList<Prescription> PrescriptionList { get;set; } = new List<Prescription>();
+    public List<Prescription> PrescriptionList { get;set; } = new List<Prescription>(); // Initialize
 
     [BindProperty(SupportsGet = true)]
     public string? SearchString { get; set; }
 
-    public async Task OnGetAsync()
+    [BindProperty(SupportsGet = true)]
+    public int CurrentPage { get; set; } = 1; // Default to page 1
+
+    public int TotalPages { get; set; }
+    public int Count { get; set; }
+
+    // --- Sorting Properties ---
+    [BindProperty(SupportsGet = true)]
+    public string? CurrentSort { get; set; }
+    public string? NameSort { get; set; } // Patient Name
+    public string? DateSort { get; set; } // Date Issued
+    // Add properties for other sortable columns (Doctor, Status, Expiry) if needed later
+    // -------------------------
+
+    public async Task OnGetAsync(string? sortOrder) // Add sortOrder parameter
     {
-        IEnumerable<Prescription> prescriptions;
-        if (!string.IsNullOrEmpty(SearchString))
+        CurrentSort = sortOrder;
+
+        // --- Determine next sort order for links ---
+        // Default sort is DateIssued Descending
+        NameSort = sortOrder == "Name" ? "name_desc" : "Name";
+        DateSort = sortOrder == "Date" ? "date_desc" : "Date";
+        // -------------------------------------------
+
+        // Ensure CurrentPage is at least 1
+        if (CurrentPage < 1)
         {
-            // TODO: Implement SearchPrescriptionsAsync in service/repo
-            prescriptions = await _prescriptionService.SearchPrescriptionsAsync(SearchString);
+            CurrentPage = 1;
         }
-        else
+
+        // Get total count for pagination calculation
+        Count = await _prescriptionService.GetPrescriptionsCountAsync(SearchString);
+        TotalPages = (int)Math.Ceiling(Count / (double)PageSize);
+
+        // Ensure CurrentPage is not beyond the last page
+        if (CurrentPage > TotalPages && TotalPages > 0)
         {
-            prescriptions = await _prescriptionService.GetAllPrescriptionsAsync();
+            CurrentPage = TotalPages;
         }
-        PrescriptionList = prescriptions.ToList();
+
+        // Get the paged data, passing the current sort order
+        PrescriptionList = await _prescriptionService.GetPrescriptionsPagedAsync(CurrentPage, PageSize, SearchString, CurrentSort);
+
+        // Note: The old logic using SearchPrescriptionsAsync/GetAllPrescriptionsAsync is replaced.
     }
 
     public async Task<IActionResult> OnPostCancelAsync(int id)
@@ -56,4 +92,4 @@ public class IndexModel : PageModel
         // Redirect back to the index page (will refresh the list)
         return RedirectToPage();
     }
-} 
+}

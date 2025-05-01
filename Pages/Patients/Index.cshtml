@@ -26,10 +26,20 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Patient[0].Name)
+                <a asp-page="./Index" asp-route-sortOrder="@Model.NameSort"
+                   asp-route-CurrentPage="@Model.CurrentPage"
+                   asp-route-SearchString="@Model.SearchString">
+                    @Html.DisplayNameFor(model => model.Patient[0].Name)
+                </a>
+                @* Optional: Add sort indicator icon here based on Model.CurrentSort *@
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Patient[0].DateOfBirth)
+                 <a asp-page="./Index" asp-route-sortOrder="@Model.DateSort"
+                   asp-route-CurrentPage="@Model.CurrentPage"
+                   asp-route-SearchString="@Model.SearchString">
+                    @Html.DisplayNameFor(model => model.Patient[0].DateOfBirth)
+                 </a>
+                 @* Optional: Add sort indicator icon here based on Model.CurrentSort *@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Patient[0].ContactInfo)
@@ -38,7 +48,12 @@
                 @Html.DisplayNameFor(model => model.Patient[0].VisitCount)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Patient[0].LastVisitDate)
+                 <a asp-page="./Index" asp-route-sortOrder="@Model.VisitDateSort"
+                   asp-route-CurrentPage="@Model.CurrentPage"
+                   asp-route-SearchString="@Model.SearchString">
+                    @Html.DisplayNameFor(model => model.Patient[0].LastVisitDate)
+                 </a>
+                 @* Optional: Add sort indicator icon here based on Model.CurrentSort *@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Patient[0].HasOutstandingBalance)
@@ -77,7 +92,14 @@
                 @Html.DisplayFor(modelItem => item.HasOutstandingBalance)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.IsActive)
+                @if (item.IsActive)
+                {
+                    <span class="badge bg-success">Active</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">Inactive</span>
+                }
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CreatedAt)
@@ -86,11 +108,62 @@
                 @Html.DisplayFor(modelItem => item.UpdatedAt)
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-page="./Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+                <a asp-page="./Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info me-1" title="Details">
+                    <i class="bi bi-info-circle"></i>
+                </a>
+                <a asp-page="./Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Delete">
+                    <i class="bi bi-trash"></i>
+                </a>
             </td>
         </tr>
 }
     </tbody>
 </table>
+
+@{
+    // Determine if Previous/Next buttons should be disabled
+    var prevDisabled = Model.CurrentPage <= 1 ? "disabled" : "";
+    var nextDisabled = Model.CurrentPage >= Model.TotalPages ? "disabled" : "";
+}
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @prevDisabled">
+                <a asp-page="./Index"
+                   asp-route-SearchString="@Model.SearchString"
+                   asp-route-CurrentPage="@(Model.CurrentPage - 1)"
+                   class="page-link" aria-label="Previous">
+                    <span aria-hidden="true">&laquo; Previous</span>
+                </a>
+            </li>
+
+            @* Optional: Add page number links here if desired *@
+            <li class="page-item active" aria-current="page">
+                 <span class="page-link">Page @Model.CurrentPage of @Model.TotalPages</span>
+            </li>
+
+            <li class="page-item @nextDisabled">
+                <a asp-page="./Index"
+                   asp-route-SearchString="@Model.SearchString"
+                   asp-route-CurrentPage="@(Model.CurrentPage + 1)"
+                   class="page-link" aria-label="Next">
+                    <span aria-hidden="true">Next &raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div class="text-center text-muted small">
+        Total Patients: @Model.Count
+    </div>
+}
+else if (Model.Count > 0)
+{
+     <div class="text-center text-muted small">
+        Total Patients: @Model.Count
+    </div>
+}

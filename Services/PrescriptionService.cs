@@ -94,4 +94,18 @@ public class PrescriptionService : IPrescriptionService
     }
 
     // Add Update/Delete service methods later if needed
-} 
+
+    // --- Implementation for Pagination Methods ---
+
+    public async Task<List<Prescription>> GetPrescriptionsPagedAsync(int pageNumber, int pageSize, string? searchTerm = null, string? sortOrder = null)
+    {
+        return await _prescriptionRepository.GetPagedAsync(pageNumber, pageSize, searchTerm, sortOrder);
+    }
+
+    public async Task<int> GetPrescriptionsCountAsync(string? searchTerm = null)
+    {
+        return await _prescriptionRepository.GetCountAsync(searchTerm);
+    }
+
+    // ---------------------------------------------
+}

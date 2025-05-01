@@ -6567,11 +6567,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\My Dev Life\\Full Stack Dev\\.Net\\Rosheta\\Roshta.csproj",
+      "projectUniqueName": "D:\\My Dev Life\\Full Stack Dev\\DotNet\\Rosheta\\Roshta.csproj",
       "projectName": "Roshta",
-      "projectPath": "D:\\My Dev Life\\Full Stack Dev\\.Net\\Rosheta\\Roshta.csproj",
+      "projectPath": "D:\\My Dev Life\\Full Stack Dev\\DotNet\\Rosheta\\Roshta.csproj",
       "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
-      "outputPath": "D:\\My Dev Life\\Full Stack Dev\\.Net\\Rosheta\\obj\\",
+      "outputPath": "D:\\My Dev Life\\Full Stack Dev\\DotNet\\Rosheta\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

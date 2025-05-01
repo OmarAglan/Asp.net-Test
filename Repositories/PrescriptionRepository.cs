@@ -94,4 +94,60 @@ public class PrescriptionRepository : IPrescriptionRepository
     }
 
     // Implement Update/Delete later if needed
-} 
+
+    // --- Implementation for Pagination Methods ---
+
+    public async Task<int> GetCountAsync(string? searchTerm = null)
+    {
+        IQueryable<Prescription> query = _context.Prescriptions;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var lowerCaseSearchTerm = searchTerm.Trim().ToLower();
+            // Include Patient for filtering
+            query = query.Include(p => p.Patient)
+                         .Where(p => p.Patient != null && p.Patient.Name != null && p.Patient.Name.ToLower().Contains(lowerCaseSearchTerm));
+        }
+
+        return await query.CountAsync();
+    }
+
+    public async Task<List<Prescription>> GetPagedAsync(int pageNumber, int pageSize, string? searchTerm = null, string? sortOrder = null)
+    {
+        IQueryable<Prescription> query = _context.Prescriptions
+                                                 .Include(p => p.Patient) // Include for display and sorting
+                                                 .Include(p => p.Doctor); // Include for display
+
+        // Apply search filter
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var lowerCaseSearchTerm = searchTerm.Trim().ToLower();
+            query = query.Where(p => p.Patient != null && p.Patient.Name != null && p.Patient.Name.ToLower().Contains(lowerCaseSearchTerm));
+        }
+
+        // Apply sorting
+        switch (sortOrder)
+        {
+            case "name_desc":
+                query = query.OrderByDescending(p => p.Patient.Name);
+                break;
+            case "Date":
+                query = query.OrderBy(p => p.DateIssued);
+                break;
+            case "date_desc":
+                query = query.OrderByDescending(p => p.DateIssued);
+                break;
+            // Add cases for other sortable columns (Doctor Name, Status, ExpiryDate) if needed later
+            default: // Default sort by DateIssued descending (newest first)
+                query = query.OrderByDescending(p => p.DateIssued);
+                break;
+        }
+
+        // Apply pagination
+        return await query.Skip((pageNumber - 1) * pageSize)
+                          .Take(pageSize)
+                          .ToListAsync();
+    }
+
+    // ---------------------------------------------
+}

@@ -109,4 +109,50 @@ public class MedicationRepository : IMedicationRepository
 
         return !exists; // True if no conflicting record exists
     }
-} 
+
+    // --- Implementation for Pagination Methods ---
+
+    public async Task<int> GetCountAsync(string? searchTerm = null)
+    {
+        IQueryable<Medication> query = _context.Medications;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var lowerCaseSearchTerm = searchTerm.Trim().ToLower();
+            query = query.Where(m => m.Name != null && m.Name.ToLower().Contains(lowerCaseSearchTerm));
+        }
+
+        return await query.CountAsync();
+    }
+
+    public async Task<List<Medication>> GetPagedAsync(int pageNumber, int pageSize, string? searchTerm = null, string? sortOrder = null)
+    {
+        IQueryable<Medication> query = _context.Medications;
+
+        // Apply search filter
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var lowerCaseSearchTerm = searchTerm.Trim().ToLower();
+            query = query.Where(m => m.Name != null && m.Name.ToLower().Contains(lowerCaseSearchTerm));
+        }
+
+        // Apply sorting
+        switch (sortOrder)
+        {
+            case "name_desc":
+                query = query.OrderByDescending(m => m.Name);
+                break;
+            // Add cases for other sortable columns (Dosage, Form, Manufacturer) if needed later
+            default: // Default sort by Name ascending
+                query = query.OrderBy(m => m.Name);
+                break;
+        }
+
+        // Apply pagination
+        return await query.Skip((pageNumber - 1) * pageSize)
+                          .Take(pageSize)
+                          .ToListAsync();
+    }
+
+    // ---------------------------------------------
+}

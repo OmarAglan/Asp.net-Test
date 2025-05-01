@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ufw5bQuOBWw=",
+  "dgSpecHash": "Agmom4TfWek=",
   "success": true,
-  "projectFilePath": "D:\\My Dev Life\\Full Stack Dev\\.Net\\Rosheta\\Roshta.csproj",
+  "projectFilePath": "D:\\My Dev Life\\Full Stack Dev\\DotNet\\Rosheta\\Roshta.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\humanizer\\2.14.1\\humanizer.2.14.1.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",

@@ -134,4 +134,71 @@ public class PatientRepository : IPatientRepository
 
         return !exists; 
     }
-} 
+
+    // --- Implementation for Pagination Methods ---
+
+    public async Task<int> GetCountAsync(string? searchTerm = null)
+    {
+        IQueryable<Patient> query = _context.Patients;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var lowerCaseSearchTerm = searchTerm.Trim().ToLower();
+            query = query.Where(p => (p.Name != null && p.Name.ToLower().Contains(lowerCaseSearchTerm)) ||
+                                     (p.ContactInfo != null && p.ContactInfo.ToLower().Contains(lowerCaseSearchTerm)));
+        }
+
+        return await query.CountAsync();
+    }
+
+    public async Task<List<Patient>> GetPagedAsync(int pageNumber, int pageSize, string? searchTerm = null, string? sortOrder = null)
+    {
+        IQueryable<Patient> query = _context.Patients;
+
+        // Apply search filter
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var lowerCaseSearchTerm = searchTerm.Trim().ToLower();
+            query = query.Where(p => (p.Name != null && p.Name.ToLower().Contains(lowerCaseSearchTerm)) ||
+                                     (p.ContactInfo != null && p.ContactInfo.ToLower().Contains(lowerCaseSearchTerm)));
+        }
+
+        // Apply sorting
+        switch (sortOrder)
+        {
+            case "name_desc":
+                query = query.OrderByDescending(p => p.Name);
+                break;
+            case "Date":
+                query = query.OrderBy(p => p.DateOfBirth);
+                break;
+            case "date_desc":
+                query = query.OrderByDescending(p => p.DateOfBirth);
+                break;
+            case "VisitDate":
+                // Handle potential nulls by sorting them last (or first, depending on preference)
+                query = query.OrderBy(p => p.LastVisitDate == null).ThenBy(p => p.LastVisitDate);
+                break;
+            case "visitdate_desc":
+                query = query.OrderByDescending(p => p.LastVisitDate.HasValue).ThenByDescending(p => p.LastVisitDate);
+                break;
+            // Add cases for other sortable columns as needed
+            // case "ContactInfo":
+            //     query = query.OrderBy(p => p.ContactInfo);
+            //     break;
+            // case "contact_desc":
+            //     query = query.OrderByDescending(p => p.ContactInfo);
+            //     break;
+            default: // Default sort by Name ascending
+                query = query.OrderBy(p => p.Name);
+                break;
+        }
+
+        // Apply pagination
+        return await query.Skip((pageNumber - 1) * pageSize)
+                          .Take(pageSize)
+                          .ToListAsync();
+    }
+
+    // ---------------------------------------------
+}

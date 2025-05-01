@@ -37,6 +37,7 @@ To provide a system for doctors to issue and manage prescriptions, patients to v
     *   Added real-time (AJAX on blur) uniqueness checks for Medication Name, Patient Name, and Patient ContactInfo on Create/Edit pages.
 *   **Service & Repository Pattern:** Business logic is separated using services and data access using repositories.
 *   **Basic Search:** Implemented simple text search on list pages for Patients (Name, ContactInfo), Medications (Name), and Prescriptions (Patient Name).
+*   **UI/UX Enhancements (Index Pages):** Replaced text action links with icons, added status badges, and implemented server-side pagination and sorting for Patients, Medications, and Prescriptions lists.
 
 ## Getting Started
 
@@ -50,4 +51,4 @@ To provide a system for doctors to issue and manage prescriptions, patients to v
 
 ## Development Roadmap
 
-See [ROADMAP.md](ROADMAP.md) for the detailed development plan. 
+See [ROADMAP.md](ROADMAP.md) for the detailed development plan.
