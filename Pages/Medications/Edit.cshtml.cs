@@ -73,6 +73,9 @@ namespace Roshta.Pages_Medications
                 }
             }
 
+            // Add success message before redirecting
+            TempData["SuccessMessage"] = $"Medication '{Medication.Name}' updated successfully.";
+
             return RedirectToPage("./Index");
         }
 

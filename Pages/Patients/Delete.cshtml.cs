@@ -49,8 +49,22 @@ namespace Roshta.Pages_Patients
             {
                 return NotFound();
             }
+            
+            // Store the name before deleting for the message
+            var patient = await _patientService.GetPatientByIdAsync(id.Value);
+            var patientName = patient?.Name ?? $"ID {id.Value}"; // Fallback to ID if name not found
 
-            await _patientService.DeletePatientAsync(id.Value);
+            var deleted = await _patientService.DeletePatientAsync(id.Value);
+
+            if (deleted)
+            {
+                TempData["SuccessMessage"] = $"Patient '{patientName}' deleted successfully.";
+            }
+            else
+            {
+                // This might happen if the patient was deleted between OnGet and OnPost, or DB error
+                TempData["ErrorMessage"] = $"Could not delete patient '{patientName}'. Please try again or contact support.";
+            }
 
             return RedirectToPage("./Index");
         }

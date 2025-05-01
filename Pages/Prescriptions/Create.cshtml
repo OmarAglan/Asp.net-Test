@@ -22,23 +22,23 @@
             <h4>Prescription Details</h4>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label asp-for="PrescriptionCreate.PatientId" class="control-label"></label>
+                    <label asp-for="PrescriptionCreate.PatientId" class="form-label"></label> @* Changed to form-label *@
                     <select asp-for="PrescriptionCreate.PatientId" class="form-select" asp-items="Model.PatientSelectList">
                         <option value="">-- Select Patient --</option>
                     </select>
-                    <span asp-validation-for="PrescriptionCreate.PatientId" class="text-danger"></span>
+                    <span asp-validation-for="PrescriptionCreate.PatientId" class="text-danger d-block"></span> @* Added d-block *@
                 </div>
                 <div class="col-md-6">
-                    <label asp-for="PrescriptionCreate.ExpiryDate" class="control-label"></label>
+                    <label asp-for="PrescriptionCreate.ExpiryDate" class="form-label"></label> @* Changed to form-label *@
                     <input asp-for="PrescriptionCreate.ExpiryDate" class="form-control" />
-                    <span asp-validation-for="PrescriptionCreate.ExpiryDate" class="text-danger"></span>
+                    <span asp-validation-for="PrescriptionCreate.ExpiryDate" class="text-danger d-block"></span> @* Added d-block *@
                 </div>
             </div>
             <div class="row mb-3">
                  <div class="col-md-6">
-                    <label asp-for="PrescriptionCreate.NextAppointmentDate" class="control-label"></label>
+                    <label asp-for="PrescriptionCreate.NextAppointmentDate" class="form-label"></label> @* Changed to form-label *@
                     <input asp-for="PrescriptionCreate.NextAppointmentDate" class="form-control" />
-                    <span asp-validation-for="PrescriptionCreate.NextAppointmentDate" class="text-danger"></span>
+                    <span asp-validation-for="PrescriptionCreate.NextAppointmentDate" class="text-danger d-block"></span> @* Added d-block *@
                 </div>
                  @* Placeholder for general form error message (e.g., if no items added) *@
                  <div class="col-md-6 align-self-end">
@@ -100,6 +100,8 @@
                      </div>
                  </div>
             </div>
+
+            <hr class="my-4" /> @* Added horizontal rule for separation *@
 
             <!-- Section where added items will be displayed -->
             <h5>Added Items:</h5>

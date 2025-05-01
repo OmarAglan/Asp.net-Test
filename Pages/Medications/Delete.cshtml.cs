@@ -45,7 +45,21 @@ namespace Roshta.Pages_Medications
                 return NotFound();
             }
 
-            await _medicationService.DeleteMedicationAsync(id.Value);
+            // Store the name before deleting for the message
+            var medication = await _medicationService.GetMedicationByIdAsync(id.Value);
+            var medicationName = medication?.Name ?? $"ID {id.Value}"; // Fallback to ID
+
+            var deleted = await _medicationService.DeleteMedicationAsync(id.Value);
+
+            if (deleted)
+            {
+                TempData["SuccessMessage"] = $"Medication '{medicationName}' deleted successfully.";
+            }
+            else
+            {
+                // This might happen if the medication was deleted between OnGet and OnPost, or DB error
+                TempData["ErrorMessage"] = $"Could not delete medication '{medicationName}'. Please try again or contact support.";
+            }
 
             return RedirectToPage("./Index");
         }

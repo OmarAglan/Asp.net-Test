@@ -57,7 +57,10 @@ namespace Roshta.Pages_Patients
                 return Page();
             }
 
-            await _patientService.AddPatientAsync(Patient);
+            var createdPatient = await _patientService.AddPatientAsync(Patient);
+
+            // Add success message
+            TempData["SuccessMessage"] = $"Patient '{createdPatient.Name}' created successfully.";
 
             return RedirectToPage("./Index");
         }

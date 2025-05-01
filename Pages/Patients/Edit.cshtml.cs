@@ -87,6 +87,9 @@ namespace Roshta.Pages_Patients
                 }
             }
 
+            // Add success message before redirecting
+            TempData["SuccessMessage"] = $"Patient '{Patient.Name}' updated successfully.";
+
             return RedirectToPage("./Index");
         }
 

@@ -39,7 +39,10 @@ namespace Roshta.Pages_Medications
                 return Page();
             }
 
-            await _medicationService.AddMedicationAsync(Medication);
+            var createdMedication = await _medicationService.AddMedicationAsync(Medication);
+
+            // Add success message
+            TempData["SuccessMessage"] = $"Medication '{createdMedication.Name}' created successfully.";
 
             return RedirectToPage("./Index");
         }

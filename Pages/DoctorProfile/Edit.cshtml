@@ -7,58 +7,46 @@
 <h2>@ViewData["Title"]</h2>
 <hr />
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success" role="alert">
-        @TempData["SuccessMessage"]
-    </div>
-}
-
-@if (TempData["ErrorMessage"] != null)
-{
-     <div class="alert alert-danger" role="alert">
-        @TempData["ErrorMessage"]
-    </div>
-}
+@* TempData messages will now be shown as toasts via JavaScript below *@
 
 <div class="row">
     <div class="col-md-6">
         <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div> @* Added mb-3 *@
             
-            <div class="form-group mb-3">
-                <label asp-for="DoctorProfile.Name" class="control-label"></label>
+            <div class="mb-3"> @* Standardized to mb-3 *@
+                <label asp-for="DoctorProfile.Name" class="form-label"></label> @* Changed to form-label *@
                 <input asp-for="DoctorProfile.Name" class="form-control" />
-                <span asp-validation-for="DoctorProfile.Name" class="text-danger"></span>
+                <span asp-validation-for="DoctorProfile.Name" class="text-danger d-block"></span> @* Added d-block *@
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="DoctorProfile.Specialization" class="control-label"></label>
+            <div class="mb-3"> @* Standardized to mb-3 *@
+                <label asp-for="DoctorProfile.Specialization" class="form-label"></label> @* Changed to form-label *@
                 <input asp-for="DoctorProfile.Specialization" class="form-control" />
-                <span asp-validation-for="DoctorProfile.Specialization" class="text-danger"></span>
+                <span asp-validation-for="DoctorProfile.Specialization" class="text-danger d-block"></span> @* Added d-block *@
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="DoctorProfile.LicenseNumber" class="control-label"></label>
+            <div class="mb-3"> @* Standardized to mb-3 *@
+                <label asp-for="DoctorProfile.LicenseNumber" class="form-label"></label> @* Changed to form-label *@
                 <input asp-for="DoctorProfile.LicenseNumber" class="form-control" />
-                <span asp-validation-for="DoctorProfile.LicenseNumber" class="text-danger"></span>
+                <span asp-validation-for="DoctorProfile.LicenseNumber" class="text-danger d-block"></span> @* Added d-block *@
             </div>
 
-             <div class="form-group mb-3">
-                <label asp-for="DoctorProfile.ContactPhone" class="control-label"></label>
+             <div class="mb-3"> @* Standardized to mb-3 *@
+                <label asp-for="DoctorProfile.ContactPhone" class="form-label"></label> @* Changed to form-label *@
                 <input asp-for="DoctorProfile.ContactPhone" class="form-control" />
-                <span asp-validation-for="DoctorProfile.ContactPhone" class="text-danger"></span>
+                <span asp-validation-for="DoctorProfile.ContactPhone" class="text-danger d-block"></span> @* Added d-block *@
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="DoctorProfile.ContactEmail" class="control-label"></label>
+            <div class="mb-3"> @* Standardized to mb-3 *@
+                <label asp-for="DoctorProfile.ContactEmail" class="form-label"></label> @* Changed to form-label *@
                 <input asp-for="DoctorProfile.ContactEmail" class="form-control" />
-                <span asp-validation-for="DoctorProfile.ContactEmail" class="text-danger"></span>
+                <span asp-validation-for="DoctorProfile.ContactEmail" class="text-danger d-block"></span> @* Added d-block *@
             </div>
 
-            <div class="form-group mt-4">
+            <div class="mt-4"> @* Standardized to mt-4 *@
                 <button type="submit" class="btn btn-primary">Save Changes</button>
-                <a asp-page="/Index" class="btn btn-secondary">Cancel</a>
+                <a asp-page="/Index" class="btn btn-outline-secondary">Cancel</a> @* Changed to outline *@
             </div>
         </form>
     </div>
@@ -148,6 +136,17 @@
             combinedLicenseHandler();
             nameRequiredHandler();
             updateSubmitButtonState(); // Final initial state check
+
+            // Check for TempData messages and display toasts
+            const successMessage = '@Html.Raw(TempData["SuccessMessage"])'; 
+            const errorMessage = '@Html.Raw(TempData["ErrorMessage"])';
+
+            if (successMessage) {
+                showToast(successMessage, 'success');
+            }
+            if (errorMessage) {
+                showToast(errorMessage, 'danger');
+            }
         });
     </script>
-} 
+}

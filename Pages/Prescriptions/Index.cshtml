@@ -8,22 +8,10 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<!-- Display TempData messages -->
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success" role="alert">
-        @TempData["SuccessMessage"]
-    </div>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger" role="alert">
-        @TempData["ErrorMessage"]
-    </div>
-}
+@* TempData messages will now be shown as toasts via JavaScript below *@
 
 <p>
-    <a asp-page="./Create" class="btn btn-primary">Create New Prescription</a>
+    <a asp-page="./Create" class="btn btn-primary"><i class="bi bi-plus-circle-fill me-1"></i>Create New Prescription</a> @* Added icon *@
 </p>
 
 <form method="get" class="mb-3">
@@ -155,4 +143,21 @@ else
             Total Prescriptions: @Model.Count
         </div>
     }
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check for TempData messages and display toasts
+            const successMessage = '@Html.Raw(TempData["SuccessMessage"])'; // Use Html.Raw to prevent encoding issues
+            const errorMessage = '@Html.Raw(TempData["ErrorMessage"])';
+
+            if (successMessage) {
+                showToast(successMessage, 'success');
+            }
+            if (errorMessage) {
+                showToast(errorMessage, 'danger');
+            }
+        });
+    </script>
 }
